@@ -1,0 +1,5 @@
+[package]
+name = "menoh-yolo"
+version = "0.1.0"
+
+[dependencies]
