@@ -34,8 +34,6 @@ class IDGenerator(object):
 
 
 def main():
-    chainer.config.train = False
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', default='YOLOv2.onnx')
     args = parser.parse_args()
@@ -43,7 +41,8 @@ def main():
     model = chainercv.links.YOLOv2(pretrained_model='voc0712')
 
     x = np.empty((1, 3, model.insize, model.insize), dtype=np.float32)
-    with mock.patch('builtins.id', IDGenerator()):
+    with chainer.using_config('train', False), \
+            mock.patch('builtins.id', IDGenerator()):
         model = onnx_chainer.export(
             chainer.Sequential(model.extractor, model.subnet),
             x, filename=args.out)
