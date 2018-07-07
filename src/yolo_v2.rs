@@ -41,10 +41,11 @@ impl YOLOv2 {
     }
 
     pub fn predict(&mut self, img: &image::DynamicImage) -> Result<Vec<bb::Bb>, menoh::Error> {
-        let (scale, offset) = set_image(self.model
-                                            .get_view_mut(Self::IN_NAME)?
-                                            .subview_mut(ndarray::Axis(0), 0),
-                                        img);
+        let scale = set_image(self.model
+                                  .get_view_mut(Self::IN_NAME)?
+                                  .subview_mut(ndarray::Axis(0), 0),
+                              img);
+
         self.model.run()?;
 
         let mut bbox = decode(self.model
@@ -54,18 +55,20 @@ impl YOLOv2 {
                               self.n_fg_class,
                               0.5);
         suppress(&mut bbox, 0.5);
+
+        let scale = Self::INSIZE as f32 / scale;
         for bb in bbox.iter_mut() {
-            bb.y_min = (bb.y_min * (Self::INSIZE as f32) - offset.0) / scale;
-            bb.x_min = (bb.x_min * (Self::INSIZE as f32) - offset.1) / scale;
-            bb.y_max = (bb.y_max * (Self::INSIZE as f32) - offset.0) / scale;
-            bb.x_max = (bb.x_max * (Self::INSIZE as f32) - offset.1) / scale;
+            bb.y_min = (bb.y_min - 0.5) * scale + img.height() as f32 / 2.;
+            bb.x_min = (bb.x_min - 0.5) * scale + img.width() as f32 / 2.;
+            bb.y_max = (bb.y_max - 0.5) * scale + img.height() as f32 / 2.;
+            bb.x_max = (bb.x_max - 0.5) * scale + img.width() as f32 / 2.;
         }
 
         Ok(bbox)
     }
 }
 
-fn set_image(mut in_: ndarray::ArrayViewMutD<f32>, img: &image::DynamicImage) -> (f32, (f32, f32)) {
+fn set_image(mut in_: ndarray::ArrayViewMutD<f32>, img: &image::DynamicImage) -> f32 {
     assert_eq!(in_.shape()[0], 3);
 
     let (in_h, in_w) = (in_.shape()[1], in_.shape()[2]);
@@ -74,19 +77,18 @@ fn set_image(mut in_: ndarray::ArrayViewMutD<f32>, img: &image::DynamicImage) ->
             .unwrap();
     let img = img.resize(in_h as _, in_w as _, image::FilterType::Nearest);
     let (h, w) = (img.height() as usize, img.width() as usize);
-    let offset = ((in_h - h) / 2, (in_w - w) / 2);
 
     in_.fill(0.5);
     for c in 0..3 {
         for y in 0..h {
             for x in 0..w {
-                in_[[c, y + offset.0, x + offset.1]] =
+                in_[[c, y + (in_h - h) / 2, x + (in_w - w) / 2]] =
                     (img.get_pixel(x as _, y as _).data[c] as f32) / 255.;
             }
         }
     }
 
-    (scale, (offset.0 as f32, offset.1 as f32))
+    scale
 }
 
 fn decode(out: ndarray::ArrayViewD<f32>,
