@@ -13,6 +13,7 @@ class YOLOv2(chainercv.links.YOLOv2):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # FIXME
         with self.init_scope():
             self.reorg = L.Convolution2D(64, 256, 2, stride=2, nobias=True)
         self.reorg.W.array[:] = 0
