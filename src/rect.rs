@@ -10,9 +10,17 @@ pub trait Rect<T>
     fn y_max(&self) -> T;
     fn x_max(&self) -> T;
 
+    fn height(&self) -> T {
+        self.y_max() - self.y_min()
+    }
+
+    fn width(&self) -> T {
+        self.x_max() - self.x_min()
+    }
+
     fn area(&self) -> T {
-        let h = self.y_max() - self.y_min();
-        let w = self.x_max() - self.x_min();
+        let h = self.height();
+        let w = self.width();
         if h > T::zero() && w > T::zero() {
             h * w
         } else {
