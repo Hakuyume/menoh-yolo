@@ -11,7 +11,7 @@
     - pkg-config (for [pkg-config](https://crates.io/crates/pkg-config))
     - libclang (for [bindgen](https://crates.io/crates/bindgen))
 - [ChainerCV](https://github.com/chainer/chainercv)
-- [onnx-chainer](https://github.com/chainer/onnx-chainer)
+- [onnx-chainer](https://github.com/chainer/onnx-chainer) 1.1.1a2
 
 ## Demo
 
