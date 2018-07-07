@@ -1,10 +1,14 @@
+extern crate docopt;
 extern crate image;
 extern crate menoh;
 #[macro_use]
 extern crate ndarray;
 extern crate num_traits;
+#[macro_use]
+extern crate serde_derive;
 
 use std::error;
+use std::path;
 
 mod bb;
 mod model_ext;
@@ -15,9 +19,9 @@ mod yolo_v2;
 use image::GenericImage;
 
 const USAGE: &'static str = r#"
-YOLOv2 on Menoh
+YOLO on Menoh
 
-Usage: menoh-yolo [src] [dest]
+Usage: menoh-yolo <src> <dest>
 "#;
 
 #[derive(Debug, Deserialize)]
@@ -33,13 +37,13 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
 
     let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", 20, "mkldnn", "")?;
 
-    let mut img = image::open(arg.arg_src)?;
+    let mut img = image::open(args.arg_src)?;
     let bbox = model.predict(&img)?;
     for bb in bbox.iter() {
         draw_bb(&mut img, bb, 2);
         println!("{} {}", bb.label, bb.score);
     }
-    img.save(arg.arg_dest)?;
+    img.save(args.arg_dest)?;
 
     Ok(())
 }
