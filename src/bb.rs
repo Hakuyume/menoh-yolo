@@ -1,6 +1,5 @@
 use rect;
 
-#[derive(Clone, Copy)]
 pub struct Bb {
     pub y_min: f32,
     pub x_min: f32,
