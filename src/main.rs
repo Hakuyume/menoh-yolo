@@ -16,8 +16,6 @@ mod partial_cmp;
 mod rect;
 mod yolo_v2;
 
-use image::GenericImage;
-
 const USAGE: &'static str = r#"
 YOLO on Menoh
 
@@ -40,36 +38,10 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
     let mut img = image::open(args.arg_src)?;
     let bbox = model.predict(&img)?;
     for bb in bbox.iter() {
-        draw_bb(&mut img, bb, 2);
+        bb::draw(&mut img, bb, 2);
         println!("{} {}", bb.label, bb.score);
     }
     img.save(args.arg_dest)?;
 
     Ok(())
-}
-
-fn draw_bb(img: &mut image::DynamicImage, bb: &bb::Bb, t: u32) {
-    let y_min = bb.y_min as u32;
-    let x_min = bb.x_min as u32;
-    let y_max = bb.y_max as u32;
-    let x_max = bb.x_max as u32;
-
-    for y in y_min..y_max {
-        for x in &[x_min, x_max] {
-            for x in x - t..x + t {
-                if y < img.height() && x < img.width() {
-                    img.put_pixel(x, y, image::Rgba { data: [255, 0, 0, 0] });
-                }
-            }
-        }
-    }
-    for x in x_min..x_max {
-        for y in &[y_min, y_max] {
-            for y in y - t..y + t {
-                if y < img.height() && x < img.width() {
-                    img.put_pixel(x, y, image::Rgba { data: [255, 0, 0, 0] });
-                }
-            }
-        }
-    }
 }
