@@ -47,7 +47,9 @@ impl YOLOv2 {
                                         img);
         self.model.run()?;
 
-        let mut bbox = decode(self.model.get_view(Self::OUT_NAME)?,
+        let mut bbox = decode(self.model
+                                  .get_view(Self::OUT_NAME)?
+                                  .subview(ndarray::Axis(0), 0),
                               Self::ANCHORS,
                               self.n_fg_class,
                               0.5);
@@ -92,9 +94,8 @@ fn decode(out: ndarray::ArrayViewD<f32>,
           n_fg_class: usize,
           thresh: f32)
           -> Vec<bb::Bb> {
-    let (out_h, out_w) = (out.shape()[2], out.shape()[3]);
-    let out = out.subview(ndarray::Axis(0), 0)
-        .into_shape((anchors.len(), 4 + 1 + n_fg_class, out_h, out_w))
+    let (out_h, out_w) = (out.shape()[1], out.shape()[2]);
+    let out = out.into_shape((anchors.len(), 4 + 1 + n_fg_class, out_h, out_w))
         .unwrap();
 
     let mut bbox = Vec::new();
