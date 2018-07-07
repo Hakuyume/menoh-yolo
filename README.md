@@ -6,9 +6,10 @@
 
 - Rust 1.27
 - Cargo
-- pkg-config (for [pkg-config](https://crates.io/crates/pkg-config))
-- libclang (for [bindgen](https://crates.io/crates/bindgen))
 - [Menoh](https://github.com/pfnet-research/menoh) 1.0+
+- [menoh-rs](https://github.com/Hakuyume/menoh-rs)
+    - pkg-config (for [pkg-config](https://crates.io/crates/pkg-config))
+    - libclang (for [bindgen](https://crates.io/crates/bindgen))
 - [ChainerCV](https://github.com/chainer/chainercv)
 - [onnx-chainer](https://github.com/chainer/onnx-chainer)
 
