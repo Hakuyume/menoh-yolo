@@ -41,6 +41,5 @@ COPY --from=build \
      /home/user/menoh-yolo/target/release/menoh-yolo \
      /home/user/menoh-yolo/YOLOv2.onnx \
      ./
-RUN pacman -U --noconfirm \
-    menoh-*-x86_64.pkg.tar.xz \
-    mkl-dnn-*-x86_64.pkg.tar.xz
+RUN pacman -U --noconfirm *.pkg.tar.xz \
+    && rm {/var/cache/pacman/pkg,.}/*.pkg.tar.xz
