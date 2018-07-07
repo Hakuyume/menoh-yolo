@@ -137,12 +137,12 @@ fn decode(out: ndarray::ArrayViewD<f32>,
 }
 
 fn suppress(bbox: &mut Vec<bb::Bb>, thresh: f32) {
-    bbox.sort_unstable_by(|a, b| if a.label == b.label {
-                              b.score
-                                  .partial_cmp(&a.score)
-                                  .unwrap_or(cmp::Ordering::Equal)
-                          } else {
-                              a.label.cmp(&b.label)
+    bbox.sort_unstable_by(|a, b| {
+                              a.label
+                                  .cmp(&b.label)
+                                  .then(b.score
+                                            .partial_cmp(&a.score)
+                                            .unwrap_or(cmp::Ordering::Equal))
                           });
     bbox.dedup_by(|a, b| a.label == b.label && a.iou(b) > thresh);
 }
