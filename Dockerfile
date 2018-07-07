@@ -15,15 +15,6 @@ RUN git clone https://github.com/Hakuyume/menoh-PKGBUILDs.git --depth=1 \
     && cd menoh && makepkg -si --noconfirm --nocheck
 
 RUN sudo pacman -Syu --noconfirm \
-    clang \
-    rustup\
-    && rustup default stable \
-    && rustup update
-COPY --chown=user:user Cargo.* menoh-yolo/
-COPY --chown=user:user src/* menoh-yolo/src/
-RUN cd menoh-yolo && cargo build --release
-
-RUN sudo pacman -Syu --noconfirm \
     python \
     python-pip \
     && pip install --user \
@@ -31,6 +22,15 @@ RUN sudo pacman -Syu --noconfirm \
     onnx-chainer==1.1.1a2
 COPY --chown=user:user convert.py menoh-yolo/
 RUN cd menoh-yolo && python convert.py
+
+RUN sudo pacman -Syu --noconfirm \
+    clang \
+    rustup\
+    && rustup default stable \
+    && rustup update
+COPY --chown=user:user Cargo.* menoh-yolo/
+COPY --chown=user:user src/* menoh-yolo/src/
+RUN cd menoh-yolo && cargo build --release
 
 FROM base/archlinux AS deploy
 RUN pacman -Syu --noconfirm
