@@ -28,3 +28,13 @@ car: 0.73168564
 dog: 0.7923419
 ```
 ![result.jpg](https://user-images.githubusercontent.com/3014172/42409967-3ef0faec-821d-11e8-8dc3-88cd8b52df26.jpg)
+
+## Demo using Docker
+
+```
+$ git clone https://github.com/Hakuyume/menoh-yolo.git
+$ docker build -t menoh-yolo menoh-yolo
+$ docker run -it menoh-yolo
+[root@*** ~]# curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
+[root@*** ~]# ./menoh-yolo dog.jpg result.jpg
+```
