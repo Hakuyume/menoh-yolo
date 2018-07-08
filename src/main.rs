@@ -53,6 +53,10 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
     }
     img.save(args.arg_dest)?;
 
+    while opencv::wait_key(None) != Some('q') {
+        opencv::imshow("result", &img)?;
+    }
+
     Ok(())
 }
 

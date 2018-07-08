@@ -2,11 +2,10 @@
 #include <opencv2/imgproc.hpp>
 
 extern "C" {
-bool cv_imshow()
+void cv_imshow(const char *winname, int rows, int cols, const uint8_t *data)
 {
-  cv::Mat img(320, 320, CV_8UC3);
-  cv::imshow("hoge", img);
-  return true;
+  cv::Mat mat(rows, cols, CV_8UC3, const_cast<uint8_t *>(data));
+  cv::imshow(winname, mat);
 }
 
 int cv_waitKey(int delay)
