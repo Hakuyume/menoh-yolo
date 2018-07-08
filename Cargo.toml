@@ -10,3 +10,7 @@ ndarray = "0.11"
 num-traits = "0.2"
 serde = "1.0"
 serde_derive = "1.0"
+
+[build-dependencies]
+cc = "1.0"
+pkg-config = "0.3"

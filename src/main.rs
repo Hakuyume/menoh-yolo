@@ -12,6 +12,7 @@ use std::path;
 
 mod bb;
 mod model_ext;
+mod opencv;
 mod partial_cmp;
 mod rect;
 mod yolo_v2;
