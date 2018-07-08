@@ -34,29 +34,24 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
         .unwrap_or_else(|e| e.exit());
 
     let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
-
-    if let Some(path) = args.arg_image {
-        let img = image::open(path)?;
+    let mut predict = |img| -> Result<_, menoh::Error> {
         let bbox = model.predict(&img)?;
-
         let mut img = opencv::IplImage::from_image(img);
         for bb in bbox.iter() {
             opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
         }
+        Ok(img)
+    };
+
+    if let Some(path) = args.arg_image {
+        let img = predict(image::open(path)?)?;
         while opencv::wait_key(None) != Some('q') {
             opencv::show_image("result", &img)?;
         }
     } else {
         let mut cap = opencv::Capture::open_camera(0).unwrap();
-
         while opencv::wait_key(Some(10)) != Some('q') {
-            let img = cap.query_frame().unwrap().into_image();
-            let bbox = model.predict(&img)?;
-
-            let mut img = opencv::IplImage::from_image(img);
-            for bb in bbox.iter() {
-                opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
-            }
+            let img = predict(cap.query_frame().unwrap().into_image())?;
             opencv::show_image("result", &img)?;
         }
     }
