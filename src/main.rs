@@ -53,8 +53,9 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
     }
     img.save(args.arg_dest)?;
 
+    let img = opencv::Mat::from_image(img);
     while opencv::wait_key(None) != Some('q') {
-        opencv::show_image("result", &opencv::Mat::new(&img))?;
+        opencv::show_image("result", &img)?;
     }
 
     Ok(())

@@ -3,4 +3,5 @@
 
 enum CvMatType {
   CV_MAT_TYPE_8UC3 = CV_8UC3,
+  CV_MAT_TYPE_8UC4 = CV_8UC4,
 };

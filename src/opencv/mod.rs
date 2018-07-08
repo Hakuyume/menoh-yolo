@@ -3,22 +3,34 @@ use std::ffi;
 
 mod sys;
 
+use image::GenericImage;
+
 pub struct Mat {
     mat: *mut sys::CvMat,
     data: Vec<u8>,
 }
 
 impl Mat {
-    pub fn new(image: &image::DynamicImage) -> Self {
-        let mut image = image.to_rgb();
-        let (rows, cols) = (image.height() as _, image.width() as _);
-        for pixel in image.pixels_mut() {
-            pixel.data.reverse();
-        }
-        let mut data = image.into_vec();
+    pub fn from_image(image: image::DynamicImage) -> Self {
+        let (rows, cols) = (image.height(), image.width());
+        let (type_, mut data, step) = match image {
+            image::DynamicImage::ImageRgb8(mut image) => {
+                for pixel in image.pixels_mut() {
+                    pixel.data.reverse();
+                }
+                (sys::CV_MAT_TYPE_8UC3, image.into_vec(), cols * 3)
+            }
+            image::DynamicImage::ImageRgba8(mut image) => {
+                for pixel in image.pixels_mut() {
+                    pixel.data[..3].reverse();
+                }
+                (sys::CV_MAT_TYPE_8UC4, image.into_vec(), cols * 4)
+            }
+            _ => unreachable!(),
+        };
         unsafe {
-            let mat = sys::cvCreateMatHeader(rows, cols, sys::CV_MAT_TYPE_8UC3 as _);
-            sys::cvSetData(mat, data.as_mut_ptr() as _, (cols * 3) as _);
+            let mat = sys::cvCreateMatHeader(rows as _, cols as _, type_ as _);
+            sys::cvSetData(mat, data.as_mut_ptr() as _, step as _);
             Self { mat, data }
         }
     }
