@@ -62,6 +62,7 @@ RUN cd menoh-yolo \
     && install -m 755 target/release/menoh-yolo /usr/local/bin/
 
 RUN tar -cvf install.tar --exclude 'python*' \
+    /etc/ld.so.conf.d/local.conf \
     /usr/local/bin/menoh-yolo \
     /usr/local/lib \
     /usr/local/share/*.onnx
@@ -76,6 +77,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=build install.tar .
 RUN tar xvf install.tar -C / \
     && rm install.tar \
-    && echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf \
     && ldconfig
 RUN curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
