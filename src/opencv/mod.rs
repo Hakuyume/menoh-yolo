@@ -11,26 +11,26 @@ mod sys;
 
 use image::GenericImage;
 
-pub struct Mat {
-    header: *mut sys::CvMat,
+pub struct IplImage {
+    header: *mut sys::IplImage,
     data: Vec<u8>,
 }
 
-impl Mat {
+impl IplImage {
     pub fn from_image(image: image::DynamicImage) -> Self {
-        let (rows, cols) = (image.height() as _, image.width() as _);
+        let (height, width) = (image.height() as _, image.width() as _);
         match image {
             image::DynamicImage::ImageRgb8(mut image) => {
                 for pixel in image.pixels_mut() {
                     pixel.data.reverse();
                 }
-                unsafe { Self::new(rows, cols, 3, image.into_vec()) }
+                Self::new(height, width, 3, image.into_vec())
             }
             image::DynamicImage::ImageRgba8(mut image) => {
                 for pixel in image.pixels_mut() {
                     pixel.data[..3].reverse();
                 }
-                unsafe { Self::new(rows, cols, 4, image.into_vec()) }
+                Self::new(height, width, 4, image.into_vec())
             }
             // ImageLuma8 and ImageLumaA8
             _ => unreachable!(),
@@ -39,19 +39,19 @@ impl Mat {
 
     pub fn into_image(mut self) -> image::DynamicImage {
         let header = unsafe { &(*self.header) };
-        let (rows, cols) = (header.rows as _, header.cols as _);
+        let (height, width) = (header.height as _, header.width as _);
         let mut data = Vec::new();
         mem::swap(&mut self.data, &mut data);
-        match header.type_ as _ {
-            sys::CV_MAT_TYPE_8UC3 => {
-                let mut image = image::RgbImage::from_raw(cols, rows, data).unwrap();
+        match header.nChannels as _ {
+            3 => {
+                let mut image = image::RgbImage::from_raw(height, width, data).unwrap();
                 for pixel in image.pixels_mut() {
                     pixel.data.reverse();
                 }
                 image::DynamicImage::ImageRgb8(image)
             }
-            sys::CV_MAT_TYPE_8UC4 => {
-                let mut image = image::RgbaImage::from_raw(cols, rows, data).unwrap();
+            4 => {
+                let mut image = image::RgbaImage::from_raw(height, width, data).unwrap();
                 for pixel in image.pixels_mut() {
                     pixel.data[..3].reverse();
                 }
@@ -61,23 +61,22 @@ impl Mat {
         }
     }
 
-    unsafe fn new(rows: usize, cols: usize, depth: usize, mut data: Vec<u8>) -> Self {
-        let type_ = match depth {
-            3 => sys::CV_MAT_TYPE_8UC3,
-            4 => sys::CV_MAT_TYPE_8UC4,
-            _ => unreachable!(),
+    fn new(height: usize, width: usize, channels: usize, mut data: Vec<u8>) -> Self {
+        assert_eq!(data.len(), height * width * channels);
+        let size = sys::CvSize {
+            height: height as _,
+            width: width as _,
         };
-        let header = sys::cvCreateMatHeader(rows as _, cols as _, type_ as _);
-        header.as_mut().unwrap().type_ = type_ as _;
+        let header = unsafe { sys::cvCreateImageHeader(size, 8, channels as _) };
         assert!(!header.is_null());
-        sys::cvSetData(header as _, data.as_mut_ptr() as _, (cols * depth) as _);
+        unsafe { sys::cvSetData(header as _, data.as_mut_ptr() as _, (width * channels) as _) };
         Self { header, data }
     }
 
-    unsafe fn empty(rows: usize, cols: usize, depth: usize) -> Self {
-        let mut data = Vec::with_capacity(rows * cols * depth);
-        data.set_len(rows * cols * depth);
-        Self::new(rows, cols, depth, data)
+    unsafe fn empty(height: usize, width: usize, channels: usize) -> Self {
+        let mut data = Vec::with_capacity(height * width * channels);
+        data.set_len(height * width * channels);
+        Self::new(height, width, channels, data)
     }
 
     fn as_arr(&self) -> *const sys::CvArr {
@@ -89,13 +88,13 @@ impl Mat {
     }
 }
 
-impl Drop for Mat {
+impl Drop for IplImage {
     fn drop(&mut self) {
-        unsafe { sys::cvReleaseMat(&mut self.header) }
+        unsafe { sys::cvReleaseImageHeader(&mut self.header) }
     }
 }
 
-pub fn show_image(name: &str, image: &Mat) -> Result<(), ffi::NulError> {
+pub fn show_image(name: &str, image: &IplImage) -> Result<(), ffi::NulError> {
     let name = ffi::CString::new(name)?;
     unsafe { sys::cvShowImage(name.as_ptr(), image.as_arr()) }
     Ok(())
@@ -110,7 +109,7 @@ pub fn wait_key(delay: Option<usize>) -> Option<char> {
     }
 }
 
-pub fn rectangle<T, R>(img: &mut Mat,
+pub fn rectangle<T, R>(img: &mut IplImage,
                        rect: &R,
                        color: &[u8; 4],
                        thickness: Option<usize>)
@@ -149,10 +148,11 @@ impl Capture {
         }
     }
 
-    pub fn query_frame(&mut self) -> Option<Mat> {
+    pub fn query_frame(&mut self) -> Option<IplImage> {
         unsafe {
             let frame = sys::cvQueryFrame(self.capture).as_ref()?;
-            let mut mat = Mat::empty(frame.height as _, frame.width as _, frame.nChannels as _);
+            let mut mat =
+                IplImage::empty(frame.height as _, frame.width as _, frame.nChannels as _);
             sys::cvCopy(frame as *const _ as _, mat.as_arr_mut(), ptr::null_mut());
             Some(mat)
         }

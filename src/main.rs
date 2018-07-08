@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
         let img = image::open(path)?;
         let bbox = model.predict(&img)?;
 
-        let mut img = opencv::Mat::from_image(img);
+        let mut img = opencv::IplImage::from_image(img);
         for bb in bbox.iter() {
             opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
         }
@@ -53,7 +53,7 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
             let img = cap.query_frame().unwrap().into_image();
             let bbox = model.predict(&img)?;
 
-            let mut img = opencv::Mat::from_image(img);
+            let mut img = opencv::IplImage::from_image(img);
             for bb in bbox.iter() {
                 opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
             }
