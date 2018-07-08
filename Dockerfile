@@ -73,6 +73,6 @@ COPY --from=build /usr/local/lib/lib*.so* /usr/local/lib/
 COPY --from=build /usr/local/share/YOLOv2.onnx /usr/local/share/
 RUN ln -sf libmkldnn.so.0.14.0 /usr/local/lib/libmkldnn.so.0 \
     && ln -sf libmkldnn.so.0 /usr/local/lib/libmkldnn.so \
-RUN echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf \
+    && echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf \
     && ldconfig
 RUN curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
