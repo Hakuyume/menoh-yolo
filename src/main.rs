@@ -42,7 +42,13 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
     let bbox = model.predict(&img)?;
     for bb in bbox.iter() {
         draw_rect(&mut img, bb);
-        println!("{}: {}", LABEL_NAMES[bb.label], bb.score);
+        println!("{}: ({}, {}, {}, {}) {}",
+                 LABEL_NAMES[bb.label],
+                 bb.y_min,
+                 bb.x_min,
+                 bb.y_max,
+                 bb.x_max,
+                 bb.score);
     }
     img.save(args.arg_dest)?;
 
