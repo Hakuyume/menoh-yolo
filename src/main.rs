@@ -133,8 +133,10 @@ const LABEL_NAMES: &'static [&'static str] = &["aeroplane",
                                                "train",
                                                "tvmonitor"];
 
+#[cfg(feature = "opencv")]
 struct TLBR<T>(T, T, T, T);
 
+#[cfg(feature = "opencv")]
 impl<T> rect::Rect<T> for TLBR<T>
     where T: Copy
 {
