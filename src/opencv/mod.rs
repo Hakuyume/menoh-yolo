@@ -2,6 +2,8 @@ use image;
 use num_traits;
 
 use std::ffi;
+use std::mem;
+use std::ptr;
 
 use rect;
 
@@ -10,52 +12,86 @@ mod sys;
 use image::GenericImage;
 
 pub struct Mat {
-    mat: *mut sys::CvMat,
-    _data: Option<Vec<u8>>,
+    header: *mut sys::CvMat,
+    data: Vec<u8>,
 }
 
 impl Mat {
     pub fn from_image(image: image::DynamicImage) -> Self {
-        let (rows, cols) = (image.height(), image.width());
-        let (type_, mut data, step) = match image {
+        let (rows, cols) = (image.height() as _, image.width() as _);
+        match image {
             image::DynamicImage::ImageRgb8(mut image) => {
                 for pixel in image.pixels_mut() {
                     pixel.data.reverse();
                 }
-                (sys::CV_MAT_TYPE_8UC3, image.into_vec(), cols * 3)
+                unsafe { Self::new(rows, cols, 3, image.into_vec()) }
             }
             image::DynamicImage::ImageRgba8(mut image) => {
                 for pixel in image.pixels_mut() {
                     pixel.data[..3].reverse();
                 }
-                (sys::CV_MAT_TYPE_8UC4, image.into_vec(), cols * 4)
+                unsafe { Self::new(rows, cols, 4, image.into_vec()) }
             }
             // ImageLuma8 and ImageLumaA8
             _ => unreachable!(),
-        };
-        unsafe {
-            let mat = sys::cvCreateMatHeader(rows as _, cols as _, type_ as _);
-            sys::cvSetData(mat as _, data.as_mut_ptr() as _, step as _);
-            Self {
-                mat,
-                _data: Some(data),
-            }
         }
     }
 
+    pub fn into_image(mut self) -> image::DynamicImage {
+        let header = unsafe { &(*self.header) };
+        let (rows, cols) = (header.rows as _, header.cols as _);
+        let mut data = Vec::new();
+        mem::swap(&mut self.data, &mut data);
+        match header.type_ as _ {
+            sys::CV_MAT_TYPE_8UC3 => {
+                let mut image = image::RgbImage::from_raw(cols, rows, data).unwrap();
+                for pixel in image.pixels_mut() {
+                    pixel.data.reverse();
+                }
+                image::DynamicImage::ImageRgb8(image)
+            }
+            sys::CV_MAT_TYPE_8UC4 => {
+                let mut image = image::RgbaImage::from_raw(cols, rows, data).unwrap();
+                for pixel in image.pixels_mut() {
+                    pixel.data[..3].reverse();
+                }
+                image::DynamicImage::ImageRgba8(image)
+            }
+            _ => unreachable!(),
+        }
+    }
+
+    unsafe fn new(rows: usize, cols: usize, depth: usize, mut data: Vec<u8>) -> Self {
+        let type_ = match depth {
+            3 => sys::CV_MAT_TYPE_8UC3,
+            4 => sys::CV_MAT_TYPE_8UC4,
+            _ => unreachable!(),
+        };
+        let header = sys::cvCreateMatHeader(rows as _, cols as _, type_ as _);
+        header.as_mut().unwrap().type_ = type_ as _;
+        assert!(!header.is_null());
+        sys::cvSetData(header as _, data.as_mut_ptr() as _, (cols * depth) as _);
+        Self { header, data }
+    }
+
+    unsafe fn empty(rows: usize, cols: usize, depth: usize) -> Self {
+        let mut data = Vec::with_capacity(rows * cols * depth);
+        data.set_len(rows * cols * depth);
+        Self::new(rows, cols, depth, data)
+    }
+
     fn as_arr(&self) -> *const sys::CvArr {
-        self.mat as _
+        self.header as _
     }
 
     fn as_arr_mut(&mut self) -> *mut sys::CvArr {
-        self.mat as _
+        self.header as _
     }
 }
 
-
 impl Drop for Mat {
     fn drop(&mut self) {
-        unsafe { sys::cvReleaseMat(&mut self.mat) }
+        unsafe { sys::cvReleaseMat(&mut self.header) }
     }
 }
 
@@ -97,4 +133,34 @@ pub fn rectangle<T, R>(img: &mut Mat,
     };
     unsafe { sys::cvRectangle(img.as_arr_mut(), pt1, pt2, color, thickness, 8, 0) }
     Some(())
+}
+
+pub struct Capture {
+    capture: *mut sys::CvCapture,
+}
+
+impl Capture {
+    pub fn open_camera(index: usize) -> Option<Self> {
+        let capture = unsafe { sys::cvCreateCameraCapture(index as _) };
+        if capture.is_null() {
+            None
+        } else {
+            Some(Self { capture })
+        }
+    }
+
+    pub fn query_frame(&mut self) -> Option<Mat> {
+        unsafe {
+            let frame = sys::cvQueryFrame(self.capture).as_ref()?;
+            let mut mat = Mat::empty(frame.height as _, frame.width as _, frame.nChannels as _);
+            sys::cvCopy(frame as *const _ as _, mat.as_arr_mut(), ptr::null_mut());
+            Some(mat)
+        }
+    }
+}
+
+impl Drop for Capture {
+    fn drop(&mut self) {
+        unsafe { sys::cvReleaseCapture(&mut self.capture) }
+    }
 }

@@ -20,13 +20,12 @@ mod yolo_v2;
 const USAGE: &'static str = r#"
 YOLO on Menoh
 
-Usage: menoh-yolo <src> <dest>
+Usage: menoh-yolo [<image>]
 "#;
 
 #[derive(Debug, Deserialize)]
 struct Args {
-    arg_src: path::PathBuf,
-    arg_dest: path::PathBuf,
+    arg_image: Option<path::PathBuf>,
 }
 
 fn main() -> Result<(), Box<dyn(error::Error)>> {
@@ -36,15 +35,30 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
 
     let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
 
-    let img = image::open(args.arg_src)?;
-    let bbox = model.predict(&img)?;
+    if let Some(path) = args.arg_image {
+        let img = image::open(path)?;
+        let bbox = model.predict(&img)?;
 
-    let mut img = opencv::Mat::from_image(img);
-    for bb in bbox.iter() {
-        opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
-    }
-    while opencv::wait_key(None) != Some('q') {
-        opencv::show_image("result", &img)?;
+        let mut img = opencv::Mat::from_image(img);
+        for bb in bbox.iter() {
+            opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
+        }
+        while opencv::wait_key(None) != Some('q') {
+            opencv::show_image("result", &img)?;
+        }
+    } else {
+        let mut cap = opencv::Capture::open_camera(0).unwrap();
+
+        while opencv::wait_key(Some(10)) != Some('q') {
+            let img = cap.query_frame().unwrap().into_image();
+            let bbox = model.predict(&img)?;
+
+            let mut img = opencv::Mat::from_image(img);
+            for bb in bbox.iter() {
+                opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
+            }
+            opencv::show_image("result", &img)?;
+        }
     }
 
     Ok(())
