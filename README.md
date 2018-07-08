@@ -23,10 +23,10 @@ $ cd menoh-yolo
 $ python3 convert.py
 
 $ curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
-$ cargo run -- dog.jpg result.jpg
-bicycle: 0.6089509
-car: 0.73168564
-dog: 0.7923419
+$ cargo run --release -- dog.jpg result.jpg
+bicycle: (78.776596, 85.96881, 420.28717, 569.1071) 0.6089509
+car: (66.229126, 443.1903, 180.43053, 658.6296) 0.73168564
+dog: (215.31303, 114.400635, 519.98016, 306.53442) 0.7923419
 ```
 
 - use Docker
