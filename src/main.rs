@@ -38,11 +38,23 @@ Usage: menoh-yolo [<image>]
         .unwrap_or_else(|e| e.exit());
 
     let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
+    let font = opencv::Font::new(1., 2);
+
     let mut predict = |img| -> Result<_, menoh::Error> {
         let bbox = model.predict(&img)?;
         let mut img = opencv::IplImage::from_image(img);
         for bb in bbox.iter() {
             opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
+            let text = format!("{}: {:.2}", LABEL_NAMES[bb.label], bb.score);
+            let ((h, w), _) = opencv::get_text_size(&text, &font).unwrap();
+            opencv::rectangle(&mut img,
+                              &TLBR(bb.y_min - h as f32 - 5.,
+                                    bb.x_min - 5.,
+                                    bb.y_min + 5.,
+                                    bb.x_min + w as f32 + 5.),
+                              &[255, 255, 255, 0],
+                              None);
+            opencv::put_text(&mut img, &text, (bb.y_min, bb.x_min), &font, &[0, 0, 0, 0]);
         }
         Ok(img)
     };
@@ -120,3 +132,22 @@ const LABEL_NAMES: &'static [&'static str] = &["aeroplane",
                                                "sofa",
                                                "train",
                                                "tvmonitor"];
+
+struct TLBR<T>(T, T, T, T);
+
+impl<T> rect::Rect<T> for TLBR<T>
+    where T: Copy
+{
+    fn y_min(&self) -> T {
+        self.0
+    }
+    fn x_min(&self) -> T {
+        self.1
+    }
+    fn y_max(&self) -> T {
+        self.2
+    }
+    fn x_max(&self) -> T {
+        self.3
+    }
+}
