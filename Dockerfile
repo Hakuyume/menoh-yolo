@@ -70,7 +70,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /usr/local/bin/menoh-yolo /usr/local/bin/
 COPY --from=build /usr/local/lib/lib*.so* /usr/local/lib/
-COPY --from=build /usr/local/sare/YOLOv2.onnx /usr/local/share/
+COPY --from=build /usr/local/share/YOLOv2.onnx /usr/local/share/
 RUN ln -sf libmkldnn.so.0.14.0 /usr/local/lib/libmkldnn.so.0 \
     && ln -sf libmkldnn.so.0 /usr/local/lib/libmkldnn.so \
 RUN echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf \
