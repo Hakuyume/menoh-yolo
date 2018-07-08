@@ -26,6 +26,7 @@ impl Mat {
                 }
                 (sys::CV_MAT_TYPE_8UC4, image.into_vec(), cols * 4)
             }
+            // ImageLuma8 and ImageLumaA8
             _ => unreachable!(),
         };
         unsafe {
