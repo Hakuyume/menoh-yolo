@@ -15,7 +15,8 @@
 
 ## Demo
 
-- build manually
+### build manually
+
 ```
 $ git clone https://github.com/Hakuyume/menoh-yolo.git
 $ cd menoh-yolo
@@ -29,7 +30,8 @@ car: (66.229126, 443.1903, 180.43053, 658.6296) 0.73168564
 dog: (215.31303, 114.400635, 519.98016, 306.53442) 0.7923419
 ```
 
-- use Docker
+### use Docker
+
 ```
 $ docker run -it hakuyume/menoh-yolo menoh-yolo dog.jpg result.jpg
 bicycle: (79.09003, 86.08069, 419.95575, 568.9399) 0.6060025
