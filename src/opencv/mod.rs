@@ -7,7 +7,7 @@ use image::GenericImage;
 
 pub struct Mat {
     mat: *mut sys::CvMat,
-    data: Vec<u8>,
+    _data: Option<Vec<u8>>,
 }
 
 impl Mat {
@@ -32,7 +32,10 @@ impl Mat {
         unsafe {
             let mat = sys::cvCreateMatHeader(rows as _, cols as _, type_ as _);
             sys::cvSetData(mat as _, data.as_mut_ptr() as _, step as _);
-            Self { mat, data }
+            Self {
+                mat,
+                _data: Some(data),
+            }
         }
     }
 
