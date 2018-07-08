@@ -74,27 +74,27 @@ pub fn wait_key(delay: Option<usize>) -> Option<char> {
     }
 }
 
-pub fn rectangle<T, R>(img: &mut Mat, rect: &R, thickness: Option<usize>) -> Option<()>
+pub fn rectangle<T, R>(img: &mut Mat,
+                       rect: &R,
+                       color: &[u8; 4],
+                       thickness: Option<usize>)
+                       -> Option<()>
     where T: num_traits::ToPrimitive,
           R: rect::Rect<T>
 {
-    unsafe {
-        sys::cvRectangle(img.as_arr_mut(),
-                         sys::CvPoint {
-                             y: rect.y_min().to_i32()?,
-                             x: rect.x_min().to_i32()?,
-                         },
-                         sys::CvPoint {
-                             y: rect.y_max().to_i32()?,
-                             x: rect.x_max().to_i32()?,
-                         },
-                         sys::CvScalar { val: [0., 0., 255., 0.] },
-                         match thickness {
-                             Some(t) => t as _,
-                             None => -1,
-                         },
-                         8,
-                         0)
-    }
+    let pt1 = sys::CvPoint {
+        y: rect.y_min().to_i32()?,
+        x: rect.x_min().to_i32()?,
+    };
+    let pt2 = sys::CvPoint {
+        y: rect.y_max().to_i32()?,
+        x: rect.x_max().to_i32()?,
+    };
+    let color = sys::CvScalar { val: [color[1] as _, color[1] as _, color[0] as _, color[3] as _] };
+    let thickness = match thickness {
+        Some(t) => t as _,
+        None => -1,
+    };
+    unsafe { sys::cvRectangle(img.as_arr_mut(), pt1, pt2, color, thickness, 8, 0) }
     Some(())
 }

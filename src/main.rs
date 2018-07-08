@@ -41,7 +41,7 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
 
     let mut img = opencv::Mat::from_image(img);
     for bb in bbox.iter() {
-        opencv::rectangle(&mut img, bb, Some(3));
+        opencv::rectangle(&mut img, bb, &[255, 0, 0, 0], Some(3));
         println!("{}: ({}, {}, {}, {}) {}",
                  LABEL_NAMES[bb.label],
                  bb.y_min,
