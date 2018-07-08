@@ -61,6 +61,11 @@ RUN cd menoh-yolo \
     cargo build --release -j $(nproc) \
     && install -m 755 target/release/menoh-yolo /usr/local/bin/
 
+RUN tar -cvf install.tar --exclude 'python*' \
+    /usr/local/bin/menoh-yolo \
+    /usr/local/lib \
+    /usr/local/share/*.onnx
+
 FROM debian:stretch AS deploy
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -68,11 +73,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libprotobuf10 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=build /usr/local/bin/menoh-yolo /usr/local/bin/
-COPY --from=build /usr/local/lib/lib*.so* /usr/local/lib/
-COPY --from=build /usr/local/share/YOLOv2.onnx /usr/local/share/
-RUN ln -sf libmkldnn.so.0.14.0 /usr/local/lib/libmkldnn.so.0 \
-    && ln -sf libmkldnn.so.0 /usr/local/lib/libmkldnn.so \
+COPY --from=build install.tar .
+RUN tar xvf install.tar -C / \
+    && rm install.tar \
     && echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf \
     && ldconfig
 RUN curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
