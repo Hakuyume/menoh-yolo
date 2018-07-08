@@ -44,14 +44,14 @@ impl IplImage {
         mem::swap(&mut self.data, &mut data);
         match header.nChannels as _ {
             3 => {
-                let mut image = image::RgbImage::from_raw(height, width, data).unwrap();
+                let mut image = image::RgbImage::from_raw(width, height, data).unwrap();
                 for pixel in image.pixels_mut() {
                     pixel.data.reverse();
                 }
                 image::DynamicImage::ImageRgb8(image)
             }
             4 => {
-                let mut image = image::RgbaImage::from_raw(height, width, data).unwrap();
+                let mut image = image::RgbaImage::from_raw(width, height, data).unwrap();
                 for pixel in image.pixels_mut() {
                     pixel.data[..3].reverse();
                 }
@@ -151,10 +151,10 @@ impl Capture {
     pub fn query_frame(&mut self) -> Option<IplImage> {
         unsafe {
             let frame = sys::cvQueryFrame(self.capture).as_ref()?;
-            let mut mat =
+            let mut img =
                 IplImage::empty(frame.height as _, frame.width as _, frame.nChannels as _);
-            sys::cvCopy(frame as *const _ as _, mat.as_arr_mut(), ptr::null_mut());
-            Some(mat)
+            sys::cvCopy(frame as *const _ as _, img.as_arr_mut(), ptr::null_mut());
+            Some(img)
         }
     }
 }
