@@ -32,9 +32,9 @@ dog: (215.31303, 114.400635, 519.98016, 306.53442) 0.7923419
 - use Docker
 ```
 $ docker run -it hakuyume/menoh-yolo menoh-yolo dog.jpg result.jpg
-bicycle: 0.6060025
-car: 0.732398
-dog: 0.79487497
+bicycle: (79.09003, 86.08069, 419.95575, 568.9399) 0.6060025
+car: (66.51419, 443.09775, 180.37459, 658.64453) 0.732398
+dog: (215.18188, 114.50763, 520.168, 306.45792) 0.79487497
 ```
 
 ![result.jpg](https://user-images.githubusercontent.com/3014172/42409967-3ef0faec-821d-11e8-8dc3-88cd8b52df26.jpg)
