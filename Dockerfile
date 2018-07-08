@@ -51,7 +51,7 @@ RUN cd menoh-yolo \
     && python3 convert.py --out /usr/local/share/YOLOv2.onnx
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=1.27.0
-COPY Cargo.* menoh-yolo/
+COPY Cargo.* build.rs menoh-yolo/
 COPY src menoh-yolo/src
 RUN cd menoh-yolo \
     && sed -e 's#YOLOv2.onnx#/usr/local/share/YOLOv2.onnx#' -i src/main.rs \
