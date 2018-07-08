@@ -19,6 +19,7 @@ fn main() {
         .whitelist_function("cvReleaseMat")
         .whitelist_function("cvShowImage")
         .whitelist_function("cvWaitKey")
+        .whitelist_function("cvRectangle")
         .prepend_enum_name(false)
         .rustfmt_bindings(false)
         .generate()

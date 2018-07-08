@@ -17,9 +17,6 @@ mod partial_cmp;
 mod rect;
 mod yolo_v2;
 
-use image::GenericImage;
-use rect::Rect;
-
 const USAGE: &'static str = r#"
 YOLO on Menoh
 
@@ -39,10 +36,12 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
 
     let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
 
-    let mut img = image::open(args.arg_src)?;
+    let img = image::open(args.arg_src)?;
     let bbox = model.predict(&img)?;
+
+    let mut img = opencv::Mat::from_image(img);
     for bb in bbox.iter() {
-        draw_rect(&mut img, bb);
+        opencv::rectangle(&mut img, bb, Some(3));
         println!("{}: ({}, {}, {}, {}) {}",
                  LABEL_NAMES[bb.label],
                  bb.y_min,
@@ -51,45 +50,11 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
                  bb.x_max,
                  bb.score);
     }
-    img.save(args.arg_dest)?;
-
-    let img = opencv::Mat::from_image(img);
     while opencv::wait_key(None) != Some('q') {
         opencv::show_image("result", &img)?;
     }
 
     Ok(())
-}
-
-pub fn draw_rect<R>(img: &mut image::DynamicImage, rect: &R)
-    where R: Rect<f32>
-{
-    let t = 2;
-    let color = image::Rgba { data: [255, 0, 0, 0] };
-
-    let y_min = rect.y_min() as u32;
-    let x_min = rect.x_min() as u32;
-    let y_max = rect.y_max() as u32;
-    let x_max = rect.x_max() as u32;
-
-    for y in y_min..y_max {
-        for x in &[x_min, x_max] {
-            for x in x - t..x + t {
-                if y < img.height() && x < img.width() {
-                    img.put_pixel(x, y, color);
-                }
-            }
-        }
-    }
-    for x in x_min..x_max {
-        for y in &[y_min, y_max] {
-            for y in y - t..y + t {
-                if y < img.height() && x < img.width() {
-                    img.put_pixel(x, y, color);
-                }
-            }
-        }
-    }
 }
 
 const LABEL_NAMES: &'static [&'static str] = &["aeroplane",

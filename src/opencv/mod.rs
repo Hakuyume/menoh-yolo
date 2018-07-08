@@ -1,5 +1,9 @@
 use image;
+use num_traits;
+
 use std::ffi;
+
+use rect;
 
 mod sys;
 
@@ -42,6 +46,10 @@ impl Mat {
     fn as_arr(&self) -> *const sys::CvArr {
         self.mat as _
     }
+
+    fn as_arr_mut(&mut self) -> *mut sys::CvArr {
+        self.mat as _
+    }
 }
 
 
@@ -64,4 +72,29 @@ pub fn wait_key(delay: Option<usize>) -> Option<char> {
     } else {
         None
     }
+}
+
+pub fn rectangle<T, R>(img: &mut Mat, rect: &R, thickness: Option<usize>) -> Option<()>
+    where T: num_traits::ToPrimitive,
+          R: rect::Rect<T>
+{
+    unsafe {
+        sys::cvRectangle(img.as_arr_mut(),
+                         sys::CvPoint {
+                             y: rect.y_min().to_i32()?,
+                             x: rect.x_min().to_i32()?,
+                         },
+                         sys::CvPoint {
+                             y: rect.y_max().to_i32()?,
+                             x: rect.x_max().to_i32()?,
+                         },
+                         sys::CvScalar { val: [0., 0., 255., 0.] },
+                         match thickness {
+                             Some(t) => t as _,
+                             None => -1,
+                         },
+                         8,
+                         0)
+    }
+    Some(())
 }
