@@ -13,6 +13,7 @@ fn main() {
                         .iter()
                         .map(|p| format!("-I{}", p.to_str().unwrap())))
         .header("wrapper.h")
+        .whitelist_type("CvArr")
         .whitelist_type("CvMatType")
         .whitelist_function("cvCreateMatHeader")
         .whitelist_function("cvSetData")

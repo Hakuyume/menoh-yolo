@@ -31,9 +31,13 @@ impl Mat {
         };
         unsafe {
             let mat = sys::cvCreateMatHeader(rows as _, cols as _, type_ as _);
-            sys::cvSetData(mat, data.as_mut_ptr() as _, step as _);
+            sys::cvSetData(mat as _, data.as_mut_ptr() as _, step as _);
             Self { mat, data }
         }
+    }
+
+    fn as_arr(&self) -> *const sys::CvArr {
+        self.mat as _
     }
 }
 
@@ -46,7 +50,7 @@ impl Drop for Mat {
 
 pub fn show_image(name: &str, image: &Mat) -> Result<(), ffi::NulError> {
     let name = ffi::CString::new(name)?;
-    unsafe { sys::cvShowImage(name.as_ptr(), image.mat) }
+    unsafe { sys::cvShowImage(name.as_ptr(), image.as_arr()) }
     Ok(())
 }
 
