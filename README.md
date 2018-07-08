@@ -31,7 +31,7 @@ dog: 0.7923419
 
 - use Docker
 ```
-$ docker run -it hakuyume/menoh-yolo menoh-yolo dog.png result.jpg
+$ docker run -it hakuyume/menoh-yolo menoh-yolo dog.jpg result.jpg
 bicycle: 0.6060025
 car: 0.732398
 dog: 0.79487497
