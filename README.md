@@ -12,6 +12,7 @@
     - libclang (for [bindgen](https://crates.io/crates/bindgen))
 - [ChainerCV](https://github.com/chainer/chainercv)
 - [onnx-chainer](https://github.com/chainer/onnx-chainer) 1.1.1a2
+- OpenCV (optional)
 
 ## Demo
 
@@ -37,6 +38,19 @@ $ docker run -it hakuyume/menoh-yolo menoh-yolo dog.jpg result.jpg
 bicycle: (79.09003, 86.08069, 419.95575, 568.9399) 0.6060025
 car: (66.51419, 443.09775, 180.37459, 658.64453) 0.732398
 dog: (215.18188, 114.50763, 520.168, 306.45792) 0.79487497
+```
+
+## Camera Demo
+
+This demo requires OpenCV.
+
+```
+$ git clone https://github.com/Hakuyume/menoh-yolo.git
+$ cd menoh-yolo
+
+$ python3 convert.py
+
+$ cargo run --features=opencv --release
 ```
 
 ![result.jpg](https://user-images.githubusercontent.com/3014172/42409967-3ef0faec-821d-11e8-8dc3-88cd8b52df26.jpg)
