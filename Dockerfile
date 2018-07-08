@@ -45,8 +45,7 @@ RUN git clone https://github.com/pfnet-research/menoh.git --branch v1.0.2 --dept
 RUN pip3 install --no-cache-dir \
     chainer==4.2 \
     chainercv==0.10 \
-    onnx-chainer==1.1.1a2 \
-    setuptools
+    onnx-chainer==1.1.1a2
 COPY convert.py menoh-yolo/
 RUN cd menoh-yolo \
     && python3 convert.py --out /usr/local/share/YOLOv2.onnx
