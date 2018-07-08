@@ -11,24 +11,28 @@ use std::error;
 use std::path;
 
 mod bb;
+#[cfg(not(feature = "opencv"))]
+mod draw;
 mod model_ext;
+#[cfg(feature = "opencv")]
 mod opencv;
 mod partial_cmp;
 mod rect;
 mod yolo_v2;
 
-const USAGE: &'static str = r#"
+#[cfg(feature = "opencv")]
+fn main() -> Result<(), Box<dyn(error::Error)>> {
+    const USAGE: &'static str = r#"
 YOLO on Menoh
 
 Usage: menoh-yolo [<image>]
 "#;
 
-#[derive(Debug, Deserialize)]
-struct Args {
-    arg_image: Option<path::PathBuf>,
-}
+    #[derive(Debug, Deserialize)]
+    struct Args {
+        arg_image: Option<path::PathBuf>,
+    }
 
-fn main() -> Result<(), Box<dyn(error::Error)>> {
     let args: Args = docopt::Docopt::new(USAGE)
         .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
@@ -55,6 +59,43 @@ fn main() -> Result<(), Box<dyn(error::Error)>> {
             opencv::show_image("result", &img)?;
         }
     }
+
+    Ok(())
+}
+
+#[cfg(not(feature = "opencv"))]
+fn main() -> Result<(), Box<dyn(error::Error)>> {
+    const USAGE: &'static str = r#"
+YOLO on Menoh
+
+Usage: menoh-yolo <src> <dest>
+"#;
+
+    #[derive(Debug, Deserialize)]
+    struct Args {
+        arg_src: path::PathBuf,
+        arg_dest: path::PathBuf,
+    }
+
+    let args: Args = docopt::Docopt::new(USAGE)
+        .and_then(|d| d.deserialize())
+        .unwrap_or_else(|e| e.exit());
+
+    let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
+
+    let mut img = image::open(args.arg_src)?;
+    let bbox = model.predict(&img)?;
+    for bb in bbox.iter() {
+        draw::draw_rect(&mut img, bb);
+        println!("{}: ({}, {}, {}, {}) {}",
+                 LABEL_NAMES[bb.label],
+                 bb.y_min,
+                 bb.x_min,
+                 bb.y_max,
+                 bb.x_max,
+                 bb.score);
+    }
+    img.save(args.arg_dest)?;
 
     Ok(())
 }

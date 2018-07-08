@@ -324,7 +324,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "menoh"
 version = "0.1.0"
-source = "git+https://github.com/Hakuyume/menoh-rs#ca8be54d27db2b1d188df411776873181c589903"
+source = "git+https://github.com/Hakuyume/menoh-rs#e0037a03c069c750b30b7a2d7b76ec8b9eba4cd0"
 dependencies = [
  "menoh-sys 0.1.0 (git+https://github.com/Hakuyume/menoh-rs)",
 ]
@@ -332,7 +332,7 @@ dependencies = [
 [[package]]
 name = "menoh-sys"
 version = "0.1.0"
-source = "git+https://github.com/Hakuyume/menoh-rs#ca8be54d27db2b1d188df411776873181c589903"
+source = "git+https://github.com/Hakuyume/menoh-rs#e0037a03c069c750b30b7a2d7b76ec8b9eba4cd0"
 dependencies = [
  "bindgen 0.37.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "pkg-config 0.3.11 (registry+https://github.com/rust-lang/crates.io-index)",

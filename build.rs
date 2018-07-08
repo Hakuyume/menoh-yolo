@@ -1,10 +1,11 @@
-extern crate bindgen;
-extern crate pkg_config;
-
-use std::env;
-use std::path;
-
+#[cfg(feature = "opencv")]
 fn main() {
+    extern crate bindgen;
+    extern crate pkg_config;
+
+    use std::env;
+    use std::path;
+
     let library = pkg_config::Config::new().probe("opencv").unwrap();
 
     let bindings = bindgen::Builder::default()
@@ -31,3 +32,6 @@ fn main() {
         .write_to_file(path::PathBuf::from(env::var("OUT_DIR").unwrap()).join("bindings.rs"))
         .unwrap();
 }
+
+#[cfg(not(feature = "opencv"))]
+fn main() {}
