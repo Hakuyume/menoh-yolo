@@ -1,24 +1,29 @@
 use num_traits;
 use partial_cmp;
 use std::cmp;
+use std::ops;
 
-pub trait Rect<T>
-    where T: Clone + cmp::PartialOrd + num_traits::Num
-{
+pub trait Rect<T> {
     fn y_min(&self) -> T;
     fn x_min(&self) -> T;
     fn y_max(&self) -> T;
     fn x_max(&self) -> T;
 
-    fn height(&self) -> T {
+    fn height(&self) -> T
+        where T: ops::Sub<Output = T>
+    {
         self.y_max() - self.y_min()
     }
 
-    fn width(&self) -> T {
+    fn width(&self) -> T
+        where T: ops::Sub<Output = T>
+    {
         self.x_max() - self.x_min()
     }
 
-    fn area(&self) -> T {
+    fn area(&self) -> T
+        where T: cmp::PartialOrd + num_traits::Zero + ops::Mul<Output = T> + ops::Sub<Output = T>
+    {
         let h = self.height();
         let w = self.width();
         if h > T::zero() && w > T::zero() {
@@ -29,7 +34,9 @@ pub trait Rect<T>
     }
 
     fn iou<RHS>(&self, rhs: &RHS) -> T
-        where RHS: Rect<T>
+    where
+        T: Clone + cmp::PartialOrd + num_traits::Zero + ops::Div<Output = T> + ops::Mul<Output = T> + ops::Sub<Output = T>,
+        RHS: Rect<T>
     {
         (|| {
             let y_min = partial_cmp::max(self.y_min(), rhs.y_min())?;
