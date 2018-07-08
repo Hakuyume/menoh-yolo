@@ -15,6 +15,7 @@
 
 ## Demo
 
+- build manually
 ```
 $ git clone https://github.com/Hakuyume/menoh-yolo.git
 $ cd menoh-yolo
@@ -28,7 +29,7 @@ car: 0.73168564
 dog: 0.7923419
 ```
 
-using Docker
+- use Docker
 ```
 $ docker run -it hakuyume/menoh-yolo menoh-yolo dog.png result.jpg
 bicycle: 0.6060025
