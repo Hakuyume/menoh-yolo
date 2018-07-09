@@ -3,6 +3,7 @@ use image;
 use menoh;
 use std::error;
 use std::path;
+use std::time;
 
 use LABEL_NAMES;
 use opencv;
@@ -26,7 +27,10 @@ pub fn main_() -> Result<(), Box<dyn(error::Error)>> {
         .unwrap_or_else(|e| e.exit());
 
     let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
+
     let font = opencv::Font::new(1., 2);
+    let start = time::Instant::now();
+    let mut n_frame = 0;
 
     let mut predict = |img| -> Result<_, menoh::Error> {
         let bbox = model.predict(&img)?;
@@ -44,6 +48,13 @@ pub fn main_() -> Result<(), Box<dyn(error::Error)>> {
                               None);
             opencv::put_text(&mut img, &text, (bb.y_min, bb.x_min), &font, &[0, 0, 0, 0]);
         }
+
+        n_frame += 1;
+        let text = format!("{:.2} FPS",
+                           n_frame as f64 / start.elapsed().as_secs() as f64);
+        let ((h, w), _) = opencv::get_text_size(&text, &font).unwrap();
+        opencv::put_text(&mut img, &text, (h as f32, 0.), &font, &[0, 0, 0, 0]);
+
         Ok(img)
     };
 
