@@ -52,7 +52,7 @@ pub fn main_() -> Result<(), Box<dyn(error::Error)>> {
         n_frame += 1;
         let text = format!("{:.2} FPS",
                            n_frame as f64 / start.elapsed().as_secs() as f64);
-        let ((h, w), _) = opencv::get_text_size(&text, &font).unwrap();
+        let ((h, _), _) = opencv::get_text_size(&text, &font).unwrap();
         opencv::put_text(&mut img, &text, (h as f32, 0.), &font, &[0, 0, 0, 0]);
 
         Ok(img)
