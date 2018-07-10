@@ -19,25 +19,22 @@ class YOLOv2(chainercv.links.YOLOv2):
         self.reorg.W.array[:] = 0
 
     def __call__(self, x):
+        x.node._onnx_name = 'input'
         with mock.patch(
                 'chainercv.links.model.yolo.yolo_v2._reorg', self.reorg):
-            return self.subnet(self.extractor(x))
+            y = self.subnet(self.extractor(x))
+        y.node._onnx_name = 'output'
+        return y
 
 
 class IDGenerator(object):
 
     def __init__(self):
-        # keep original function
+        # keep original
         self._id = id
-        self._count = 0
-        self._map = {}
 
     def __call__(self, obj):
-        id_ = self._id(obj)
-        if id_ not in self._map:
-            self._map[id_] = 'v{:04d}'.format(self._count)
-            self._count += 1
-        return self._map[id_]
+        return getattr(obj, '_onnx_name', self._id(obj))
 
 
 def main():
