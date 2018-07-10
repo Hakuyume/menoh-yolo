@@ -4,8 +4,7 @@
 
 ## Requirements
 
-- Rust 1.27
-- Cargo
+- Rust 1.27+
 - [Menoh](https://github.com/pfnet-research/menoh) 1.0+
 - [menoh-rs](https://github.com/Hakuyume/menoh-rs)
     - pkg-config (for [pkg-config](https://crates.io/crates/pkg-config))
