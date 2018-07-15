@@ -73,12 +73,6 @@ impl IplImage {
         Self { header, data }
     }
 
-    unsafe fn empty(height: usize, width: usize, channels: usize) -> Self {
-        let mut data = Vec::with_capacity(height * width * channels);
-        data.set_len(height * width * channels);
-        Self::new(height, width, channels, data)
-    }
-
     fn as_arr(&self) -> *const sys::CvArr {
         self.header as _
     }
@@ -191,8 +185,11 @@ impl Capture {
     pub fn query_frame(&mut self) -> Option<IplImage> {
         unsafe {
             let frame = sys::cvQueryFrame(self.capture).as_ref()?;
-            let mut img =
-                IplImage::empty(frame.height as _, frame.width as _, frame.nChannels as _);
+            let (height, width, channels) =
+                (frame.height as _, frame.width as _, frame.nChannels as _);
+            let mut data = Vec::with_capacity(height * width * channels);
+            data.set_len(height * width * channels);
+            let mut img = IplImage::new(height, width, channels, data);
             sys::cvCopy(frame as *const _ as _, img.as_arr_mut(), ptr::null_mut());
             Some(img)
         }
