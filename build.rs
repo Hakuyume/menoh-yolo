@@ -7,7 +7,6 @@ fn main() {
     use std::path;
 
     let library = pkg_config::Config::new().probe("opencv").unwrap();
-
     let bindings = bindgen::Builder::default()
         .clang_args(library
                         .include_paths
@@ -20,10 +19,6 @@ fn main() {
         .whitelist_function("cvCopy")
         .whitelist_function("cvShowImage")
         .whitelist_function("cvWaitKey")
-        .whitelist_function("cvRectangle")
-        .whitelist_function("cvInitFont")
-        .whitelist_function("cvGetTextSize")
-        .whitelist_function("cvPutText")
         .whitelist_function("cvCreateCameraCapture")
         .whitelist_function("cvReleaseCapture")
         .whitelist_function("cvQueryFrame")

@@ -4,21 +4,21 @@ use std::cmp;
 use std::ops;
 
 pub trait Rect<T> {
-    fn y_min(&self) -> T;
-    fn x_min(&self) -> T;
-    fn y_max(&self) -> T;
-    fn x_max(&self) -> T;
+    fn top(&self) -> T;
+    fn left(&self) -> T;
+    fn bottom(&self) -> T;
+    fn right(&self) -> T;
 
     fn height(&self) -> T
         where T: ops::Sub<Output = T>
     {
-        self.y_max() - self.y_min()
+        self.bottom() - self.top()
     }
 
     fn width(&self) -> T
         where T: ops::Sub<Output = T>
     {
-        self.x_max() - self.x_min()
+        self.right() - self.left()
     }
 
     fn area(&self) -> T
@@ -39,13 +39,13 @@ pub trait Rect<T> {
         RHS: Rect<T>
     {
         (|| {
-            let y_min = partial_cmp::max(self.y_min(), rhs.y_min())?;
-            let x_min = partial_cmp::max(self.x_min(), rhs.x_min())?;
-            let y_max = partial_cmp::min(self.y_max(), rhs.y_max())?;
-            let x_max = partial_cmp::min(self.x_max(), rhs.x_max())?;
+            let top = partial_cmp::max(self.top(), rhs.top())?;
+            let left = partial_cmp::max(self.left(), rhs.left())?;
+            let bottom = partial_cmp::min(self.bottom(), rhs.bottom())?;
+            let right = partial_cmp::min(self.right(), rhs.right())?;
 
-            let h = y_max - y_min;
-            let w = x_max - x_min;
+            let h = bottom - top;
+            let w = right - left;
             let i = if h > T::zero() && w > T::zero() {
                 h * w
             } else {

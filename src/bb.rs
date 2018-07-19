@@ -1,25 +1,25 @@
 use rect;
 
 pub struct Bb {
-    pub y_min: f32,
-    pub x_min: f32,
-    pub y_max: f32,
-    pub x_max: f32,
+    pub top: f32,
+    pub left: f32,
+    pub bottom: f32,
+    pub right: f32,
     pub label: usize,
     pub score: f32,
 }
 
 impl rect::Rect<f32> for Bb {
-    fn y_min(&self) -> f32 {
-        self.y_min
+    fn top(&self) -> f32 {
+        self.top
     }
-    fn x_min(&self) -> f32 {
-        self.x_min
+    fn left(&self) -> f32 {
+        self.left
     }
-    fn y_max(&self) -> f32 {
-        self.y_max
+    fn bottom(&self) -> f32 {
+        self.bottom
     }
-    fn x_max(&self) -> f32 {
-        self.x_max
+    fn right(&self) -> f32 {
+        self.right
     }
 }

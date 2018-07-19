@@ -58,10 +58,10 @@ impl YOLOv2 {
 
         let scale = Self::INSIZE as f32 / scale;
         for bb in bbox.iter_mut() {
-            bb.y_min = (bb.y_min - 0.5) * scale + img.height() as f32 / 2.;
-            bb.x_min = (bb.x_min - 0.5) * scale + img.width() as f32 / 2.;
-            bb.y_max = (bb.y_max - 0.5) * scale + img.height() as f32 / 2.;
-            bb.x_max = (bb.x_max - 0.5) * scale + img.width() as f32 / 2.;
+            bb.top = (bb.top - 0.5) * scale + img.height() as f32 / 2.;
+            bb.left = (bb.left - 0.5) * scale + img.width() as f32 / 2.;
+            bb.bottom = (bb.bottom - 0.5) * scale + img.height() as f32 / 2.;
+            bb.right = (bb.right - 0.5) * scale + img.width() as f32 / 2.;
         }
 
         Ok(bbox)
@@ -121,10 +121,10 @@ fn decode(out: ndarray::ArrayViewD<f32>,
                 for lb in 0..n_fg_class {
                     if score[lb] >= thresh {
                         bbox.push(bb::Bb {
-                                      y_min: (y - h / 2.) / out_h as f32,
-                                      x_min: (x - w / 2.) / out_w as f32,
-                                      y_max: (y + h / 2.) / out_h as f32,
-                                      x_max: (x + w / 2.) / out_w as f32,
+                                      top: (y - h / 2.) / out_h as f32,
+                                      left: (x - w / 2.) / out_w as f32,
+                                      bottom: (y + h / 2.) / out_h as f32,
+                                      right: (x + w / 2.) / out_w as f32,
                                       label: lb,
                                       score: score[lb],
                                   });

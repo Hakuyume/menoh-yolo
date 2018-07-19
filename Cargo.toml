@@ -9,9 +9,11 @@ opencv = ["bindgen", "pkg-config"]
 [dependencies]
 docopt = "1.0"
 image = "0.19"
+imageproc = "0.15"
 menoh = "0.1"
 ndarray = "0.11"
 num-traits = "0.2"
+rusttype = "0.5"
 serde = "1.0"
 serde_derive = "1.0"
 

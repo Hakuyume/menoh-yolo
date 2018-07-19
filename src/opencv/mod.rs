@@ -1,11 +1,8 @@
 use image;
-use num_traits;
 
 use std::ffi;
 use std::mem;
 use std::ptr;
-
-use rect;
 
 mod sys;
 
@@ -101,71 +98,6 @@ pub fn wait_key(delay: Option<usize>) -> Option<char> {
     } else {
         None
     }
-}
-
-pub fn rectangle<T, R>(img: &mut IplImage,
-                       rect: &R,
-                       color: &[u8; 4],
-                       thickness: Option<usize>)
-                       -> Option<()>
-    where T: num_traits::ToPrimitive,
-          R: rect::Rect<T>
-{
-    let pt1 = sys::CvPoint {
-        y: rect.y_min().to_i32()?,
-        x: rect.x_min().to_i32()?,
-    };
-    let pt2 = sys::CvPoint {
-        y: rect.y_max().to_i32()?,
-        x: rect.x_max().to_i32()?,
-    };
-    let color = sys::CvScalar { val: [color[1] as _, color[1] as _, color[0] as _, color[3] as _] };
-    let thickness = match thickness {
-        Some(t) => t as _,
-        None => -1,
-    };
-    unsafe { sys::cvRectangle(img.as_arr_mut(), pt1, pt2, color, thickness, 8, 0) }
-    Some(())
-}
-
-pub type Font = sys::CvFont;
-
-impl Font {
-    pub fn new(scale: f64, thickness: usize) -> Self {
-        unsafe {
-            let mut font = mem::uninitialized();
-            sys::cvInitFont(&mut font, 0, scale, scale, 0., thickness as _, 8);
-            font
-        }
-    }
-}
-
-pub fn get_text_size(text_string: &str, font: &Font) -> Option<((isize, isize), isize)> {
-    unsafe {
-        let text_string = ffi::CString::new(text_string).ok()?;
-        let mut size = mem::uninitialized();
-        let mut baseline = 0;
-        sys::cvGetTextSize(text_string.as_ptr(), font, &mut size, &mut baseline);
-        Some(((size.height as _, size.width as _), baseline as _))
-    }
-}
-
-pub fn put_text<T>(img: &mut IplImage,
-                   text: &str,
-                   org: (T, T),
-                   font: &Font,
-                   color: &[u8; 4])
-                   -> Option<()>
-    where T: num_traits::ToPrimitive
-{
-    let text = ffi::CString::new(text).ok()?;
-    let org = sys::CvPoint {
-        y: org.0.to_i32()?,
-        x: org.1.to_i32()?,
-    };
-    let color = sys::CvScalar { val: [color[1] as _, color[1] as _, color[0] as _, color[3] as _] };
-    unsafe { sys::cvPutText(img.as_arr_mut(), text.as_ptr(), org, font, color) }
-    Some(())
 }
 
 pub struct Capture {
