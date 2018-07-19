@@ -42,17 +42,16 @@ RUN git clone https://github.com/pfnet-research/menoh.git --branch v1.0.2 --dept
     && make -j $(nproc) \
     && make install
 
+COPY . menoh-yolo/
+
 RUN pip3 install --no-cache-dir \
     chainer==4.2 \
     chainercv==0.10 \
     onnx-chainer==1.1.1a2
-COPY convert.py menoh-yolo/
 RUN cd menoh-yolo \
     && python3 convert.py --out /usr/local/share/YOLOv2.onnx
 
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=1.27.0
-COPY Cargo.* build.rs menoh-yolo/
-COPY src menoh-yolo/src
 RUN cd menoh-yolo \
     && sed -e 's#YOLOv2.onnx#/usr/local/share/YOLOv2.onnx#' -i src/main.rs \
     && PATH=$HOME/.cargo/bin:$PATH \
