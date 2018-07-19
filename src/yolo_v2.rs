@@ -54,7 +54,7 @@ impl YOLOv2 {
                               Self::ANCHORS,
                               self.n_fg_class,
                               0.5);
-        suppress(&mut bbox, 0.5);
+        suppress(&mut bbox, 0.45);
 
         let scale = Self::INSIZE as f32 / scale;
         for bb in bbox.iter_mut() {
