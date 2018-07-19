@@ -9,14 +9,13 @@
 - [ChainerCV](https://github.com/chainer/chainercv)
 - [onnx-chainer](https://github.com/chainer/onnx-chainer) 1.1.1a2
 - OpenCV (optional)
-- libclang (for [bindgen](https://crates.io/crates/bindgen))
 
 ## Demo
 
 ### build manually
 
 ```
-$ git clone https://github.com/Hakuyume/menoh-yolo.git
+$ git clone https://github.com/Hakuyume/menoh-yolo.git --recursive
 $ cd menoh-yolo
 
 $ python3 convert.py
@@ -42,7 +41,7 @@ dog: (215.18188, 114.50763, 520.168, 306.45792) 0.79487497
 This demo requires OpenCV.
 
 ```
-$ git clone https://github.com/Hakuyume/menoh-yolo.git
+$ git clone https://github.com/Hakuyume/menoh-yolo.git --recursive
 $ cd menoh-yolo
 
 $ python3 convert.py
@@ -51,4 +50,4 @@ $ cargo run --features=opencv --release
 (press 'q' to quit)
 ```
 
-![result.jpg](https://user-images.githubusercontent.com/3014172/42409967-3ef0faec-821d-11e8-8dc3-88cd8b52df26.jpg)
+![result.jpg](https://user-images.githubusercontent.com/3014172/42957529-efc58ec4-8bbd-11e8-9b00-440924369e2b.jpg)
