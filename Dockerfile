@@ -29,7 +29,7 @@ RUN git clone https://github.com/intel/mkl-dnn.git --branch=v0.14 --depth=1 \
     -DWITH_TEST=OFF \
     && make -j $(nproc) \
     && make install
-RUN git clone https://github.com/pfnet-research/menoh.git --branch v1.0.2 --depth=1 \
+RUN git clone https://github.com/pfnet-research/menoh.git --branch=v1.0.2 --depth=1 \
     && cd menoh \
     && mkdir build \
     && cd build \
