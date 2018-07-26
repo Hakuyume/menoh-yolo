@@ -108,12 +108,12 @@ fn decode(out: ndarray::ArrayViewD<f32>,
                 let obj = out[[a, 4, y, x]];
                 let conf = out.slice(s![a, 4 + 1.., y, x]);
 
-                let y = y as f32 + 1. / (1. + (-loc[0]).exp());
-                let x = x as f32 + 1. / (1. + (-loc[2]).exp());
+                let y = y as f32 + sigmoid(loc[0]);
+                let x = x as f32 + sigmoid(loc[1]);
                 let h = anchors[a].0 * loc[2].exp();
                 let w = anchors[a].1 * loc[3].exp();
 
-                let obj = 1. / (1. + (-obj).exp());
+                let obj = sigmoid(obj);
                 let mut score = conf.map(|c| c.exp());
                 let sum = score.scalar_sum();
                 score.map_inplace(|s| *s *= obj / sum);
@@ -134,6 +134,10 @@ fn decode(out: ndarray::ArrayViewD<f32>,
         }
     }
     bbox
+}
+
+fn sigmoid(x: f32) -> f32 {
+    1. / (1. + (-x).exp())
 }
 
 fn suppress(bbox: &mut Vec<bb::Bb>, thresh: f32) {
