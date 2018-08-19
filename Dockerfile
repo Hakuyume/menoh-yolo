@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 RUN echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf \
     && ldconfig
-RUN git clone https://github.com/intel/mkl-dnn.git --branch=v0.14 --depth=1 \
+RUN git clone https://github.com/intel/mkl-dnn.git --branch=v0.16 --depth=1 \
     && cd mkl-dnn/scripts \
     && ./prepare_mkl.sh \
     && cd .. \
@@ -28,7 +28,7 @@ RUN git clone https://github.com/intel/mkl-dnn.git --branch=v0.14 --depth=1 \
     -DWITH_TEST=OFF \
     && make -j $(nproc) \
     && make install
-RUN git clone https://github.com/pfnet-research/menoh.git --branch=v1.0.2 --depth=1 \
+RUN git clone https://github.com/pfnet-research/menoh.git --branch=v1.0.3 --depth=1 \
     && cd menoh \
     && mkdir build \
     && cd build \
