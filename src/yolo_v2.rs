@@ -20,18 +20,22 @@ impl YOLOv2 {
     const IN_NAME: &'static str = "input";
     const OUT_NAME: &'static str = "output";
     const INSIZE: usize = 416;
-    const ANCHORS: &'static [(f32, f32)] = &[(1.73145, 1.3221),
-                                             (4.00944, 3.19275),
-                                             (8.09892, 5.05587),
-                                             (4.84053, 9.47112),
-                                             (10.0071, 11.2364)];
+    const ANCHORS: &'static [(f32, f32)] = &[
+        (1.73145, 1.3221),
+        (4.00944, 3.19275),
+        (8.09892, 5.05587),
+        (4.84053, 9.47112),
+        (10.0071, 11.2364),
+    ];
 
-    pub fn from_onnx<P>(path: P,
-                        n_fg_class: usize,
-                        backend: &str,
-                        backend_config: &str)
-                        -> Result<Self, menoh::Error>
-        where P: AsRef<path::Path>
+    pub fn from_onnx<P>(
+        path: P,
+        n_fg_class: usize,
+        backend: &str,
+        backend_config: &str,
+    ) -> Result<Self, menoh::Error>
+    where
+        P: AsRef<path::Path>,
     {
         let model = menoh::Builder::from_onnx(path)?
             .add_input::<f32>(Self::IN_NAME, &[1, 3, Self::INSIZE, Self::INSIZE])?
@@ -41,19 +45,23 @@ impl YOLOv2 {
     }
 
     pub fn predict(&mut self, img: &image::DynamicImage) -> Result<Vec<bb::Bb>, menoh::Error> {
-        let scale = set_image(self.model
-                                  .get_view_mut(Self::IN_NAME)?
-                                  .subview_mut(ndarray::Axis(0), 0),
-                              img);
+        let scale = set_image(
+            self.model
+                .get_view_mut(Self::IN_NAME)?
+                .subview_mut(ndarray::Axis(0), 0),
+            img,
+        );
 
         self.model.run()?;
 
-        let mut bbox = decode(self.model
-                                  .get_view(Self::OUT_NAME)?
-                                  .subview(ndarray::Axis(0), 0),
-                              Self::ANCHORS,
-                              self.n_fg_class,
-                              0.5);
+        let mut bbox = decode(
+            self.model
+                .get_view(Self::OUT_NAME)?
+                .subview(ndarray::Axis(0), 0),
+            Self::ANCHORS,
+            self.n_fg_class,
+            0.5,
+        );
         suppress(&mut bbox, 0.45);
 
         let scale = Self::INSIZE as f32 / scale;
@@ -72,9 +80,10 @@ fn set_image(mut in_: ndarray::ArrayViewMutD<f32>, img: &image::DynamicImage) ->
     assert_eq!(in_.shape()[0], 3);
 
     let (in_h, in_w) = (in_.shape()[1], in_.shape()[2]);
-    let scale = partial_cmp::min((in_h as f32) / (img.height() as f32),
-                                 (in_w as f32) / (img.width() as f32))
-            .unwrap();
+    let scale = partial_cmp::min(
+        (in_h as f32) / (img.height() as f32),
+        (in_w as f32) / (img.width() as f32),
+    ).unwrap();
     let img = img.resize(in_h as _, in_w as _, image::FilterType::Nearest);
     let (h, w) = (img.height() as usize, img.width() as usize);
 
@@ -91,13 +100,15 @@ fn set_image(mut in_: ndarray::ArrayViewMutD<f32>, img: &image::DynamicImage) ->
     scale
 }
 
-fn decode(out: ndarray::ArrayViewD<f32>,
-          anchors: &[(f32, f32)],
-          n_fg_class: usize,
-          thresh: f32)
-          -> Vec<bb::Bb> {
+fn decode(
+    out: ndarray::ArrayViewD<f32>,
+    anchors: &[(f32, f32)],
+    n_fg_class: usize,
+    thresh: f32,
+) -> Vec<bb::Bb> {
     let (out_h, out_w) = (out.shape()[1], out.shape()[2]);
-    let out = out.into_shape((anchors.len(), 4 + 1 + n_fg_class, out_h, out_w))
+    let out = out
+        .into_shape((anchors.len(), 4 + 1 + n_fg_class, out_h, out_w))
         .unwrap();
 
     let mut bbox = Vec::new();
@@ -121,13 +132,13 @@ fn decode(out: ndarray::ArrayViewD<f32>,
                 for lb in 0..n_fg_class {
                     if score[lb] >= thresh {
                         bbox.push(bb::Bb {
-                                      top: (y - h / 2.) / out_h as f32,
-                                      left: (x - w / 2.) / out_w as f32,
-                                      bottom: (y + h / 2.) / out_h as f32,
-                                      right: (x + w / 2.) / out_w as f32,
-                                      label: lb,
-                                      score: score[lb],
-                                  });
+                            top: (y - h / 2.) / out_h as f32,
+                            left: (x - w / 2.) / out_w as f32,
+                            bottom: (y + h / 2.) / out_h as f32,
+                            right: (x + w / 2.) / out_w as f32,
+                            label: lb,
+                            score: score[lb],
+                        });
                     }
                 }
             }
@@ -142,11 +153,11 @@ fn sigmoid(x: f32) -> f32 {
 
 fn suppress(bbox: &mut Vec<bb::Bb>, thresh: f32) {
     bbox.sort_unstable_by(|a, b| {
-                              a.label
-                                  .cmp(&b.label)
-                                  .then(b.score
-                                            .partial_cmp(&a.score)
-                                            .unwrap_or(cmp::Ordering::Equal))
-                          });
+        a.label.cmp(&b.label).then(
+            b.score
+                .partial_cmp(&a.score)
+                .unwrap_or(cmp::Ordering::Equal),
+        )
+    });
     bbox.dedup_by(|a, b| a.label == b.label && a.iou(b) > thresh);
 }

@@ -21,29 +21,31 @@ mod partial_cmp;
 mod rect;
 mod yolo_v2;
 
-const LABEL_NAMES: &'static [&'static str] = &["aeroplane",
-                                               "bicycle",
-                                               "bird",
-                                               "boat",
-                                               "bottle",
-                                               "bus",
-                                               "car",
-                                               "cat",
-                                               "chair",
-                                               "cow",
-                                               "diningtable",
-                                               "dog",
-                                               "horse",
-                                               "motorbike",
-                                               "person",
-                                               "pottedplant",
-                                               "sheep",
-                                               "sofa",
-                                               "train",
-                                               "tvmonitor"];
+const LABEL_NAMES: &'static [&'static str] = &[
+    "aeroplane",
+    "bicycle",
+    "bird",
+    "boat",
+    "bottle",
+    "bus",
+    "car",
+    "cat",
+    "chair",
+    "cow",
+    "diningtable",
+    "dog",
+    "horse",
+    "motorbike",
+    "person",
+    "pottedplant",
+    "sheep",
+    "sofa",
+    "train",
+    "tvmonitor",
+];
 
 #[cfg(not(feature = "opencv"))]
-pub fn main() -> Result<(), Box<dyn(error::Error)>> {
+pub fn main() -> Result<(), Box<dyn error::Error>> {
     use rect::Rect;
     use std::path;
 
@@ -70,13 +72,15 @@ Usage: menoh-yolo <src> <dest>
     let bbox = model.predict(&img)?;
     drawing::draw_bbox_mut(&mut img, bbox.iter(), LABEL_NAMES, &font);
     for bb in bbox.iter() {
-        println!("{}, ({}, {}, {}, {}) {}",
-                 LABEL_NAMES[bb.label],
-                 bb.top(),
-                 bb.left(),
-                 bb.bottom(),
-                 bb.right(),
-                 bb.score);
+        println!(
+            "{}, ({}, {}, {}, {}) {}",
+            LABEL_NAMES[bb.label],
+            bb.top(),
+            bb.left(),
+            bb.bottom(),
+            bb.right(),
+            bb.score
+        );
     }
     img.save(args.arg_dest)?;
 
@@ -84,7 +88,7 @@ Usage: menoh-yolo <src> <dest>
 }
 
 #[cfg(feature = "opencv")]
-pub fn main() -> Result<(), Box<dyn(error::Error)>> {
+pub fn main() -> Result<(), Box<dyn error::Error>> {
     use std::time;
 
     let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
@@ -100,15 +104,18 @@ pub fn main() -> Result<(), Box<dyn(error::Error)>> {
         drawing::draw_bbox_mut(&mut img, bbox.iter(), LABEL_NAMES, &font);
 
         n_frame += 1;
-        imageproc::drawing::draw_text_mut(&mut img,
-                                          image::Rgba { data: [0, 0, 0, 0] },
-                                          0,
-                                          0,
-                                          rusttype::Scale::uniform(32.),
-                                          &font,
-                                          &format!("{:.2} FPS",
-                                                   n_frame as f64 /
-                                                   start.elapsed().as_secs() as f64));
+        imageproc::drawing::draw_text_mut(
+            &mut img,
+            image::Rgba { data: [0, 0, 0, 0] },
+            0,
+            0,
+            rusttype::Scale::uniform(32.),
+            &font,
+            &format!(
+                "{:.2} FPS",
+                n_frame as f64 / start.elapsed().as_secs() as f64
+            ),
+        );
         opencv::show_image("result", &opencv::IplImage::from_image(img))?;
     }
 

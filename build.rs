@@ -11,10 +11,12 @@ fn main() {
 
     let library = pkg_config::Config::new().probe("opencv").unwrap();
     let bindings = bindgen::Builder::default()
-        .clang_args(library
-                        .include_paths
-                        .iter()
-                        .map(|p| format!("-I{}", p.to_str().unwrap())))
+        .clang_args(
+            library
+                .include_paths
+                .iter()
+                .map(|p| format!("-I{}", p.to_str().unwrap())),
+        )
         .header("wrapper.h")
         .whitelist_function("cvCreateImageHeader")
         .whitelist_function("cvSetData")
