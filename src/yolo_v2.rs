@@ -17,8 +17,8 @@ pub struct YOLOv2 {
 }
 
 impl YOLOv2 {
-    const IN_NAME: &'static str = "input";
-    const OUT_NAME: &'static str = "output";
+    const IN_NAME: &'static str = "Input_0";
+    const OUT_NAME: &'static str = "Conv_23";
     const INSIZE: usize = 416;
     const ANCHORS: &'static [(f32, f32)] = &[
         (1.73145, 1.3221),
