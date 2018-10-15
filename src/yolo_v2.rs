@@ -39,7 +39,7 @@ impl YOLOv2 {
     {
         let model = menoh::Builder::from_onnx(path)?
             .add_input::<f32>(Self::IN_NAME, &[1, 3, Self::INSIZE, Self::INSIZE])?
-            .add_output::<f32>(Self::OUT_NAME)?
+            .add_output(Self::OUT_NAME)?
             .build(backend, backend_config)?;
         Ok(Self { model, n_fg_class })
     }
