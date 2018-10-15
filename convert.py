@@ -9,7 +9,8 @@ import onnx_chainer
 
 
 # YOLOv2 with some hacks
-# FIXME: Reorg layer cannot be implemented by Menoh. Temporarily, we replace it with a dummy convolution.
+# FIXME: Reorg layer cannot be implemented by Menoh.
+# Temporarily, we replace it with a dummy convolution.
 class YOLOv2(chainercv.links.YOLOv2):
 
     def __init__(self, *args, **kwargs):
