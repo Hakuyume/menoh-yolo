@@ -5,7 +5,7 @@
 ## Requirements
 
 - Rust 1.27+
-- [Menoh](https://github.com/pfnet-research/menoh) 1.0+
+- [Menoh](https://github.com/pfnet-research/menoh) 1.1+
 - [ChainerCV](https://github.com/chainer/chainercv)
 - [onnx-chainer](https://github.com/chainer/onnx-chainer) 1.2.2a3
 - OpenCV (optional)
