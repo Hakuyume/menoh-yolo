@@ -10,9 +10,9 @@ RUN apt-get update \
     python3-dev \
     python3-pip \
     python3-setuptools \
-    && curl -LO $DOWNLOAD/v1.1.0/ubuntu1804_mkl-dnn_0.16-1_amd64.deb \
-    && curl -LO $DOWNLOAD/v1.1.0/ubuntu1804_menoh_1.1.0-1_amd64.deb \
-    && curl -LO $DOWNLOAD/v1.1.0/ubuntu1804_menoh-dev_1.1.0-1_amd64.deb \
+    && curl -LO $DOWNLOAD/v1.1.1/ubuntu1804_mkl-dnn_0.16-1_amd64.deb \
+    && curl -LO $DOWNLOAD/v1.1.1/ubuntu1804_menoh_1.1.1-1_amd64.deb \
+    && curl -LO $DOWNLOAD/v1.1.1/ubuntu1804_menoh-dev_1.1.1-1_amd64.deb \
     && apt install -y ./*.deb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
