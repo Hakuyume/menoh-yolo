@@ -18,9 +18,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && rm *.deb
 
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=stable
+
 COPY . menoh-yolo/
 
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=stable
 RUN cd menoh-yolo \
     && sed -e 's#YOLOv2.onnx#/usr/local/share/YOLOv2.onnx#' -i src/main.rs \
     && PATH=$HOME/.cargo/bin:$PATH cargo build --release -j $(nproc) \
