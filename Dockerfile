@@ -21,7 +21,6 @@ RUN apt-get update \
 COPY . menoh-yolo/
 
 RUN pip3 install --no-cache-dir \
-    chainer==4.4 \
     chainercv==0.10 \
     onnx-chainer==1.2.2a3
 RUN cd menoh-yolo \
