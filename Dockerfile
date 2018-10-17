@@ -20,16 +20,16 @@ RUN apt-get update \
 
 COPY . menoh-yolo/
 
-RUN pip3 install --no-cache-dir \
-    chainercv==0.10 \
-    onnx-chainer==1.2.2a3
-RUN cd menoh-yolo \
-    && python3 convert.py --out /usr/local/share/YOLOv2.onnx
-
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=stable
 RUN cd menoh-yolo \
     && sed -e 's#YOLOv2.onnx#/usr/local/share/YOLOv2.onnx#' -i src/main.rs \
     && PATH=$HOME/.cargo/bin:$PATH cargo build --release -j $(nproc) \
     && install -m 755 target/release/menoh-yolo /usr/local/bin/
+
+RUN pip3 install --no-cache-dir \
+    chainercv==0.10 \
+    onnx-chainer==1.2.2a3 \
+    && python3 menoh-yolo/convert.py --out /usr/local/share/YOLOv2.onnx \
+    && rm -rf $HOME/.chainer
 
 RUN curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
