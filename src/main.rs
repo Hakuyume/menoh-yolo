@@ -11,6 +11,7 @@ extern crate rusttype;
 extern crate serde_derive;
 
 use std::error;
+use std::path;
 
 mod bb;
 mod drawing;
@@ -47,25 +48,28 @@ const LABEL_NAMES: &'static [&'static str] = &[
 #[cfg(not(feature = "opencv"))]
 pub fn main() -> Result<(), Box<dyn error::Error>> {
     use rect::Rect;
-    use std::path;
 
     const USAGE: &'static str = r#"
 YOLO on Menoh
 
-Usage: menoh-yolo <src> <dest>
+Usage: menoh-yolo [options] <src> <dest>
+
+Options:
+  --model PATH  onnx model path [default: YOLOv2.onnx]
 "#;
 
     #[derive(Debug, Deserialize)]
     struct Args {
         arg_src: path::PathBuf,
         arg_dest: path::PathBuf,
+        flag_model: path::PathBuf,
     }
 
     let args: Args = docopt::Docopt::new(USAGE)
         .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
 
-    let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
+    let mut model = yolo_v2::YOLOv2::from_onnx(args.flag_model, LABEL_NAMES.len(), "mkldnn", "")?;
     let font = drawing::get_font()?;
 
     let mut img = image::open(args.arg_src)?;
@@ -91,10 +95,30 @@ Usage: menoh-yolo <src> <dest>
 pub fn main() -> Result<(), Box<dyn error::Error>> {
     use std::time;
 
-    let mut model = yolo_v2::YOLOv2::from_onnx("YOLOv2.onnx", LABEL_NAMES.len(), "mkldnn", "")?;
+    const USAGE: &'static str = r#"
+YOLO on Menoh
+
+Usage: menoh-yolo [options]
+
+Options:
+  --model PATH  onnx model path [default: YOLOv2.onnx]
+  --camera ID  camera ID [default: 0]
+"#;
+
+    #[derive(Debug, Deserialize)]
+    struct Args {
+        flag_model: path::PathBuf,
+        flag_camera: usize,
+    }
+
+    let args: Args = docopt::Docopt::new(USAGE)
+        .and_then(|d| d.deserialize())
+        .unwrap_or_else(|e| e.exit());
+
+    let mut model = yolo_v2::YOLOv2::from_onnx(args.flag_model, LABEL_NAMES.len(), "mkldnn", "")?;
     let font = drawing::get_font()?;
 
-    let mut cap = opencv::Capture::open_camera(0).unwrap();
+    let mut cap = opencv::Capture::open_camera(args.flag_camera).unwrap();
     let start = time::Instant::now();
     let mut n_frame = 0;
 
