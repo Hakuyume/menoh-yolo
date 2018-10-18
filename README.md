@@ -50,4 +50,13 @@ $ cargo run --features=opencv --release
 (press 'q' to quit)
 ```
 
+If the FPS is too low, please try smaller model.
+
+```
+$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/YOLOv2_light.onnx
+
+$ cargo run --features=opencv --release -- --model YOLOv2_light.onnx
+(press 'q' to quit)
+```
+
 ![result.jpg](https://user-images.githubusercontent.com/3014172/42957529-efc58ec4-8bbd-11e8-9b00-440924369e2b.jpg)
