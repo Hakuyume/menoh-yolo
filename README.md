@@ -6,8 +6,6 @@
 
 - Rust 1.27+
 - [Menoh](https://github.com/pfnet-research/menoh) 1.1.1+
-- [ChainerCV](https://github.com/chainer/chainercv)
-- [onnx-chainer](https://github.com/chainer/onnx-chainer) 1.2.2a3
 - OpenCV (optional)
 
 ## Demo
@@ -18,7 +16,8 @@
 $ git clone https://github.com/Hakuyume/menoh-yolo.git --recursive
 $ cd menoh-yolo
 
-$ python3 convert.py
+$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.onnx
+$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.json
 
 $ curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
 $ cargo run --release -- dog.jpg result.jpg
@@ -44,17 +43,20 @@ This demo requires OpenCV.
 $ git clone https://github.com/Hakuyume/menoh-yolo.git --recursive
 $ cd menoh-yolo
 
-$ python3 convert.py
+$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.onnx
+$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.json
 
 $ cargo run --features=opencv --release
 (press 'q' to quit)
 ```
 
-If the FPS is too low, please try smaller model.
+If the FPS is too low, please try YOLOv2 tiny.
 
 ```
-$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/YOLOv2_light.onnx
-$ cargo run --features=opencv --release -- --model YOLOv2_light.onnx
+$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_tiny_voc0712.onnx
+$ curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_tiny_voc0712.json
+
+$ cargo run --features=opencv --release -- --model yolo_v2_tiny_voc0712.onnx --config yolo_v2_tiny_voc0712.json
 (press 'q' to quit)
 ```
 
