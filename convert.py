@@ -64,10 +64,11 @@ def main():
             model, x, filename=args.model_out, opset_version=7)
 
     config = {
+        'input': onnx_model.graph.node[0].input[0],
+        'output': onnx_model.graph.node[-1].output[0],
         'insize': model.insize,
-        'grid': model.extractor.grid,
         'anchors': model._anchors,
-        'output': onnx_model.graph.output[0].name,
+        'label_names': chainercv.datasets.voc_bbox_label_names,
     }
     with open(args.config_out, mode='w') as f:
         json.dump(config, f)

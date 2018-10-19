@@ -1,6 +1,7 @@
 use image;
 use imageproc;
 use rusttype;
+use std::fmt;
 use std::ops;
 
 use bb;
@@ -11,15 +12,12 @@ pub fn get_font() -> Result<rusttype::Font<'static>, rusttype::Error> {
     rusttype::Font::from_bytes(include_bytes!("../opensans/ttfs/OpenSans-Regular.ttf") as &[u8])
 }
 
-pub fn draw_bbox_mut<'a, 'b, I, B, L>(
-    image: &mut I,
-    bbox: B,
-    label_names: &L,
-    font: &rusttype::Font,
-) where
+pub fn draw_bbox_mut<'a, I, B, L, S>(image: &mut I, bbox: B, label_names: &L, font: &rusttype::Font)
+where
     I: image::GenericImage<Pixel = image::Rgba<u8>>,
     B: Iterator<Item = &'a bb::Bb>,
-    L: ?Sized + ops::Index<usize, Output = &'b str>,
+    L: ?Sized + ops::Index<usize, Output = S>,
+    S: fmt::Display,
 {
     let scale = 32.;
 
@@ -31,10 +29,10 @@ pub fn draw_bbox_mut<'a, 'b, I, B, L>(
                 rusttype::Scale::uniform(scale),
                 rusttype::Point { x: 0., y: 0. },
             ).filter_map(|l| l.pixel_bounding_box())
-                .last()
-                .unwrap()
-                .max
-                .x + 2;
+            .last()
+            .unwrap()
+            .max
+            .x + 2;
         imageproc::drawing::draw_filled_rect_mut(
             image,
             imageproc::rect::Rect::at(bb.left() as _, (bb.top() - scale) as _)

@@ -11,26 +11,24 @@ use image::GenericImage;
 use model_ext::ModelExt;
 use rect::Rect;
 
-pub struct YOLOv2 {
-    model: menoh::Model,
-    n_fg_class: usize,
+#[derive(Deserialize)]
+pub struct Config {
+    pub input: String,
+    pub output: String,
+    pub insize: usize,
+    pub anchors: Vec<(f32, f32)>,
+    pub label_names: Vec<String>,
 }
 
-impl YOLOv2 {
-    const IN_NAME: &'static str = "Input_0";
-    const OUT_NAME: &'static str = "Conv_23";
-    const INSIZE: usize = 416;
-    const ANCHORS: &'static [(f32, f32)] = &[
-        (1.73145, 1.3221),
-        (4.00944, 3.19275),
-        (8.09892, 5.05587),
-        (4.84053, 9.47112),
-        (10.0071, 11.2364),
-    ];
+pub struct YOLOv2<'a> {
+    model: menoh::Model,
+    config: &'a Config,
+}
 
+impl<'a> YOLOv2<'a> {
     pub fn from_onnx<P>(
         path: P,
-        n_fg_class: usize,
+        config: &'a Config,
         backend: &str,
         backend_config: &str,
     ) -> Result<Self, menoh::Error>
@@ -38,16 +36,16 @@ impl YOLOv2 {
         P: AsRef<path::Path>,
     {
         let model = menoh::Builder::from_onnx(path)?
-            .add_input::<f32>(Self::IN_NAME, &[1, 3, Self::INSIZE, Self::INSIZE])?
-            .add_output(Self::OUT_NAME)?
+            .add_input::<f32>(&config.input, &[1, 3, config.insize, config.insize])?
+            .add_output(&config.output)?
             .build(backend, backend_config)?;
-        Ok(Self { model, n_fg_class })
+        Ok(Self { model, config })
     }
 
     pub fn predict(&mut self, img: &image::DynamicImage) -> Result<Vec<bb::Bb>, menoh::Error> {
         let scale = set_image(
             self.model
-                .get_view_mut(Self::IN_NAME)?
+                .get_view_mut(&self.config.input)?
                 .subview_mut(ndarray::Axis(0), 0),
             img,
         );
@@ -56,15 +54,15 @@ impl YOLOv2 {
 
         let mut bbox = decode(
             self.model
-                .get_view(Self::OUT_NAME)?
+                .get_view(&self.config.output)?
                 .subview(ndarray::Axis(0), 0),
-            Self::ANCHORS,
-            self.n_fg_class,
+            &self.config.anchors,
+            self.config.label_names.len(),
             0.5,
         );
         suppress(&mut bbox, 0.45);
 
-        let scale = Self::INSIZE as f32 / scale;
+        let scale = self.config.insize as f32 / scale;
         for bb in bbox.iter_mut() {
             bb.top = (bb.top - 0.5) * scale + img.height() as f32 / 2.;
             bb.left = (bb.left - 0.5) * scale + img.width() as f32 / 2.;
