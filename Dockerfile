@@ -23,14 +23,13 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain=stable
 COPY . menoh-yolo/
 
 RUN cd menoh-yolo \
-    && sed -e 's#YOLOv2.onnx#/usr/local/share/YOLOv2.onnx#' -i src/main.rs \
+    && sed -e 's#yolo_v2_voc0712.onnx#/usr/local/share/yolo_v2_voc0712.onnx#' -i src/main.rs \
+    && sed -e 's#yolo_v2_voc0712.json#/usr/local/share/yolo_v2_voc0712.json#' -i src/main.rs \
     && PATH=$HOME/.cargo/bin:$PATH cargo build --release -j $(nproc) \
     && install -m 755 target/release/menoh-yolo /usr/local/bin/
 
-RUN pip3 install --no-cache-dir \
-    chainercv==0.10 \
-    onnx-chainer==1.2.2a3 \
-    && python3 menoh-yolo/convert.py --out /usr/local/share/YOLOv2.onnx \
-    && rm -rf $HOME/.chainer
+RUN cd /usr/local/share \
+    && curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.onnx \
+    && curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.json \
 
 RUN curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
