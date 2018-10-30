@@ -30,6 +30,6 @@ RUN cd menoh-yolo \
 
 RUN cd /usr/local/share \
     && curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.onnx \
-    && curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.json \
+    && curl -LO https://github.com/Hakuyume/menoh-yolo/releases/download/assets/yolo_v2_voc0712.json
 
 RUN curl -LO https://github.com/pjreddie/darknet/raw/master/data/dog.jpg
