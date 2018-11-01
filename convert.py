@@ -1,7 +1,6 @@
 import argparse
 import json
 import numpy as np
-import os
 from unittest import mock
 
 import chainer
