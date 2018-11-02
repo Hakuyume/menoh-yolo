@@ -7,11 +7,12 @@ import chainer
 import chainer.functions as F
 import chainer.links as L
 import chainercv
+import onnx
 import onnx_chainer
 
 
 # YOLOv2 with some hacks
-# FIXME: reorg layer cannot be implemented by Menoh.
+# FIXME: Menoh cannot caluculate reorg layer.
 # Temporarily, we replace it with a dummy convolution.
 class YOLOv2(chainercv.links.YOLOv2):
 
@@ -28,19 +29,14 @@ class YOLOv2(chainercv.links.YOLOv2):
 
 
 # YOLOv2Tiny with some hacks
-# FIXME: maxpool layer with stride=1 cannot be implemented by Menoh.
-# Temporarily, we skip it.
-class YOLOv2Tiny(chainercv.links.YOLOv2Tiny):
+# FIXME: onnx-chainer cannot treat maxpool layer (darknet version).
+# Temporarily, we modify onnx model directly.
+class YOLOv2Tiny(chainercv.experimental.links.YOLOv2Tiny):
 
     def __call__(self, x):
-        def _maxpool(x, ksize, stride=None):
-            if stride is None or ksize == stride:
-                return F.max_pooling_2d(x, ksize, stride)
-            else:
-                return x
-
         with mock.patch(
-                'chainercv.links.model.yolo.yolo_v2._maxpool', _maxpool):
+                'chainercv.experimental.links.model.yolo.yolo_v2_tiny._maxpool',
+                F.max_pooling_2d):
             return self.subnet(self.extractor(x))
 
 
@@ -54,13 +50,22 @@ def main():
 
     if args.model == 'yolo_v2':
         model = YOLOv2(pretrained_model='voc0712')
-    else:
+    elif args.model == 'yolo_v2_tiny':
         model = YOLOv2Tiny(pretrained_model='voc0712')
 
     x = np.empty((1, 3, model.insize, model.insize), dtype=np.float32)
     with chainer.using_config('train', False):
-        onnx_model = onnx_chainer.export(
-            model, x, filename=args.model_out, opset_version=7)
+        onnx_model = onnx_chainer.export(model, x, opset_version=7)
+
+    # Fix MaxPool
+    for op in onnx_model.graph.node:
+        if op.op_type == 'MaxPool':
+            attrs = {attr.name: attr for attr in op.attribute}
+            for i in {0, 1}:
+                attrs['pads'].ints[2 + i] += \
+                    attrs['kernel_shape'].ints[i] - attrs['strides'].ints[i]
+
+    onnx.save(onnx_model, args.model_out)
 
     config = {
         'input': onnx_model.graph.node[0].input[0],
