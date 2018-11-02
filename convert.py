@@ -11,8 +11,8 @@ import onnx
 import onnx_chainer
 
 
-# YOLOv2 with some hacks
-# FIXME: Menoh cannot caluculate reorg layer.
+# YOLOv2
+# FIXME: Menoh cannot caluculate Reorg layer.
 # Temporarily, we replace it with a dummy convolution.
 class YOLOv2(chainercv.links.YOLOv2):
 
@@ -28,9 +28,9 @@ class YOLOv2(chainercv.links.YOLOv2):
             return self.subnet(self.extractor(x))
 
 
-# YOLOv2Tiny with some hacks
-# FIXME: onnx-chainer cannot treat maxpool layer (darknet version).
-# Temporarily, we modify onnx model directly.
+# YOLOv2Tiny
+# onnx-chainer cannot treat Darknet's MaxPool layer.
+# We replace it with Chainer's MaxPool and modify onnx model directly.
 class YOLOv2Tiny(chainercv.experimental.links.YOLOv2Tiny):
 
     def __call__(self, x):
