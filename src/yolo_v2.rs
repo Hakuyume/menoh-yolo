@@ -46,7 +46,7 @@ impl<'a> YOLOv2<'a> {
         let scale = set_image(
             self.model
                 .get_view_mut(&self.config.input)?
-                .subview_mut(ndarray::Axis(0), 0),
+                .index_axis_mut(ndarray::Axis(0), 0),
             img,
         );
 
@@ -55,7 +55,7 @@ impl<'a> YOLOv2<'a> {
         let mut bbox = decode(
             self.model
                 .get_view(&self.config.output)?
-                .subview(ndarray::Axis(0), 0),
+                .index_axis(ndarray::Axis(0), 0),
             &self.config.anchors,
             self.config.label_names.len(),
             0.5,
@@ -81,7 +81,8 @@ fn set_image(mut in_: ndarray::ArrayViewMutD<f32>, img: &image::DynamicImage) ->
     let scale = partial_cmp::min(
         (in_h as f32) / (img.height() as f32),
         (in_w as f32) / (img.width() as f32),
-    ).unwrap();
+    )
+    .unwrap();
     let img = img.resize(in_h as _, in_w as _, image::FilterType::Nearest);
     let (h, w) = (img.height() as usize, img.width() as usize);
 
