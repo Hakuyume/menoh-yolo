@@ -1,6 +1,5 @@
 use std::cmp;
 
-#[allow(dead_code)]
 pub fn min<T>(v1: T, v2: T) -> Option<T>
 where
     T: cmp::PartialOrd,
@@ -11,7 +10,6 @@ where
     }
 }
 
-#[allow(dead_code)]
 pub fn max<T>(v1: T, v2: T) -> Option<T>
 where
     T: cmp::PartialOrd,

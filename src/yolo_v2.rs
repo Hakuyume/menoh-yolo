@@ -1,15 +1,13 @@
 use image;
 use menoh;
 use ndarray;
-use std::cmp;
 use std::path;
 
 use bb;
-use partial_cmp;
 
 use image::GenericImage;
 use model_ext::ModelExt;
-use rect::Rect;
+use partial_cmp;
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -60,7 +58,7 @@ impl<'a> YOLOv2<'a> {
             self.config.label_names.len(),
             0.5,
         );
-        suppress(&mut bbox, 0.45);
+        bb::non_maximum_suppression(&mut bbox, 0.45);
 
         let scale = self.config.insize as f32 / scale;
         for bb in bbox.iter_mut() {
@@ -148,15 +146,4 @@ fn decode(
 
 fn sigmoid(x: f32) -> f32 {
     1. / (1. + (-x).exp())
-}
-
-fn suppress(bbox: &mut Vec<bb::Bb>, thresh: f32) {
-    bbox.sort_unstable_by(|a, b| {
-        a.label.cmp(&b.label).then(
-            b.score
-                .partial_cmp(&a.score)
-                .unwrap_or(cmp::Ordering::Equal),
-        )
-    });
-    bbox.dedup_by(|a, b| a.label == b.label && a.iou(b) > thresh);
 }
